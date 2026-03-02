@@ -177,6 +177,16 @@ urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
 
 c1, c2, c3 = st.columns(3)
+
+st.markdown("""
+<style>
+.kpi-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
 with c1:
     st.markdown(
         f"""
