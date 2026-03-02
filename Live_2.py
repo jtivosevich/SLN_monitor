@@ -179,8 +179,8 @@ por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
 st.markdown("""
 <style>
 .kpi-title {
-    font-weight: bold;
-    font-size: 1.1rem;
+    font-weight: bold !important;
+    font-size: 1.1rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -191,7 +191,7 @@ with c1:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
-        <div class="kpi-title">Vencidos</div>
+        <div class="kpi-title"><b>Vencidos</b></div>
         <div class="kpi-value" style="color:red;">{vencidos}</div>
     </div>
     """,
@@ -201,7 +201,7 @@ with c2:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
-        <div class="kpi-title">Urgentes (&lt;30m)</div>
+        <div class="kpi-title"><b>Urgentes (&lt;30m)</b></div>
         <div class="kpi-value" style="color:orange;">{urgentes}</div>
     </div>
     """,
@@ -211,7 +211,7 @@ with c3:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
-        <div class="kpi-title">Por vencer</div>
+        <div class="kpi-title"><b>Por vencer</b></div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
     """,
