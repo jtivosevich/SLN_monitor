@@ -176,8 +176,6 @@ vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
 urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
 
-c1, c2, c3 = st.columns(3)
-
 st.markdown("""
 <style>
 .kpi-title {
@@ -186,6 +184,8 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+c1, c2, c3 = st.columns(3)
 
 with c1:
     st.markdown(
