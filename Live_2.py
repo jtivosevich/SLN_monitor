@@ -65,7 +65,7 @@ h1 {
 # AUTOREFRESH (cada 1 segundo)
 refresh_counter = st_autorefresh(interval=1000, key="refresh")
 
-st.title("Vencimientos Servicios de HOY")
+st.title("Servicios de HOY")
 st.write("VERSIÓN DEBUG 1 - " + datetime.now().strftime("%H:%M:%S"))
 
 # ---------------- LOAD DATA ----------------
