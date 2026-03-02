@@ -18,16 +18,33 @@ COL_FECHA_DB = "fecha_programacion"
 COL_UPDATED_DB = "updated_at"
 
 # ---------------- STREAMLIT ----------------
-st.set_page_config(page_title="Vencimientos de Casos", page_icon="favicon.png", layout="wide")
+st.set_page_config(
+    page_title="Vencimientos de Casos",
+    page_icon="favicon.png",
+    layout="wide"
+)
 
+# Estilos globales
 st.markdown(
     """
 <style>
-.block-container { padding-top: 0.6rem !important; padding-bottom: 0.8rem !important; }
-h1 { margin-bottom: 0.2rem !important; }
-.stCaption { margin-bottom: 0.2rem !important; }
-.stColumns { margin-bottom: 0.4rem !important; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
 
+.block-container { 
+    padding-top: 0.6rem !important; 
+    padding-bottom: 0.8rem !important; 
+}
+h1 { 
+    margin-bottom: 0.2rem !important; 
+}
+.stCaption { 
+    margin-bottom: 0.2rem !important; 
+}
+.stColumns { 
+    margin-bottom: 0.4rem !important; 
+}
+
+/* Tarjetas KPI */
 .kpi-card {
     height: 120px;
     border-radius: 14px;
@@ -37,6 +54,17 @@ h1 { margin-bottom: 0.2rem !important; }
     justify-content: center;
 }
 
+/* 🔥 TÍTULOS DE LAS TARJETAS */
+.kpi-title {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 20px !important;
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    margin-bottom: 4px;
+}
+
+/* Valor numérico */
 .kpi-value {
     font-size: 46px;
     font-weight: 900;
@@ -47,8 +75,9 @@ h1 { margin-bottom: 0.2rem !important; }
     unsafe_allow_html=True,
 )
 
-# AUTOREFRESH
+# AUTOREFRESH (cada 1 segundo)
 refresh_counter = st_autorefresh(interval=1000, key="refresh")
+
 st.title("Vencimientos Servicios de HOY")
 
 # ---------------- LOAD DATA ----------------
@@ -65,7 +94,7 @@ def load_data_from_supabase() -> pd.DataFrame:
 
 df = load_data_from_supabase()
 
-# ---------------- RELOJ ----------------
+# ---------------- RELOJ + ÚLTIMA LECTURA ----------------
 now_ui = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
 
 last_updated = None
@@ -158,7 +187,7 @@ for dtx in df[COL_FECHA_DB]:
 df["EstadoTiempo"] = estados
 df["DetalleTiempo"] = detalles
 
-# ---------------- KPIs FINALES (TÍTULOS EN NEGRITA) ----------------
+# ---------------- KPIs ----------------
 vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
 urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
@@ -169,9 +198,7 @@ with c1:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
-        <div style="font-weight:900; font-size:20px; opacity:1; margin-bottom:4px;">
-            Vencidos
-        </div>
+        <div class="kpi-title">Vencidos</div>
         <div class="kpi-value" style="color:red;">{vencidos}</div>
     </div>
     """,
@@ -182,9 +209,7 @@ with c2:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
-        <div style="font-weight:900; font-size:20px; opacity:1; margin-bottom:4px;">
-            Urgentes (&lt;30m)
-        </div>
+        <div class="kpi-title">Urgentes (&lt;30m)</div>
         <div class="kpi-value" style="color:orange;">{urgentes}</div>
     </div>
     """,
@@ -195,9 +220,7 @@ with c3:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
-        <div style="font-weight:900; font-size:20px; opacity:1; margin-bottom:4px;">
-            Por vencer
-        </div>
+        <div class="kpi-title">Por vencer</div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
     """,
@@ -206,7 +229,7 @@ with c3:
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-# ---------------- GRÁFICO ----------------
+# ---------------- GRÁFICO DONUT ----------------
 dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
 total = dist_estado["cantidad"].sum()
 dist_estado["porcentaje"] = (dist_estado["cantidad"] / total * 100).round(1)
@@ -224,13 +247,17 @@ donut_chart = (
         color=alt.Color(
             "EstadoTiempo:N",
             scale=color_scale,
-            legend=alt.Legend(title="EstadoTiempo", titleFontWeight="bold")
+            legend=alt.Legend(
+                title="EstadoTiempo",
+                titleFontWeight="bold",
+                labelFontWeight="normal"
+            )
         ),
         tooltip=[
             alt.Tooltip("EstadoTiempo:N", title="Estado"),
             alt.Tooltip("cantidad:Q", title="Cantidad"),
             alt.Tooltip("porcentaje:Q", title="Porcentaje (%)")
-        ],
+        ]
     )
     .properties(height=420)
 )
@@ -239,18 +266,23 @@ with st.expander("Gráfico de servicios por estado"):
     st.subheader("Distribución de servicios por estado")
     st.altair_chart(donut_chart, use_container_width=True)
 
+st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
 # ---------------- ORDEN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
 df["_ord"] = df["EstadoTiempo"].map(order_map).fillna(99)
 df = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"])
 
-# ---------------- PARPADEO ----------------
+# ---------------- PARPADEO URGENTES ----------------
 blink_on = (datetime.now(ZoneInfo("America/Santiago")).second % 2 == 0)
 
-# ---------------- TABLA ----------------
+# ---------------- TABLA BASE ----------------
 tabla = df[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
 tabla = tabla.rename(
-    columns={COL_OS_DB: "O/S", "fecha_programacion_display": "Fecha Programación de servicio"}
+    columns={
+        COL_OS_DB: "O/S",
+        "fecha_programacion_display": "Fecha Programación de servicio",
+    }
 ).reset_index(drop=True)
 
 def icono_estado(est):
@@ -278,7 +310,7 @@ else:
 
 st.subheader(view_title)
 
-# ---------------- ESTILOS FILA ----------------
+# ---------------- ESTILOS FILAS ----------------
 def style_row(row):
     styles = [""] * len(row)
     idx_riesgo = row.index.get_loc("Riesgo")
