@@ -18,7 +18,7 @@ COL_FECHA_DB = "fecha_programacion"
 COL_UPDATED_DB = "updated_at"
 
 # ---------------- STREAMLIT ----------------
-st.set_page_config(page_title="Vencimientos de Casos", page_icon="favicon.png" , layout="wide")
+st.set_page_config(page_title="Vencimientos de Casos", page_icon="favicon.png", layout="wide")
 
 st.markdown(
     """
@@ -36,19 +36,27 @@ h1 { margin-bottom: 0.2rem !important; }
     flex-direction: column;
     justify-content: center;
 }
-.kpi-title { font-size: 16px; opacity: 0.9; }
-.kpi-value { font-size: 46px; font-weight: 900; line-height: 1.1; }
+
+/* 🔥 TITULO DE TARJETAS EN NEGRITA Y MÁS GRANDE */
+.kpi-title {
+    font-size: 18px;
+    font-weight: 800;
+    opacity: 1;
+}
+
+.kpi-value {
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.1;
+}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-
-# CONTADOR DE AUTOREFRESH (1 SEGUNDO)
+# AUTOREFRESH
 refresh_counter = st_autorefresh(interval=1000, key="refresh")
-
 st.title("Vencimientos Servicios de HOY")
-
 
 # ---------------- LOAD DATA ----------------
 def load_data_from_supabase() -> pd.DataFrame:
@@ -64,8 +72,7 @@ def load_data_from_supabase() -> pd.DataFrame:
 
 df = load_data_from_supabase()
 
-
-# ---------------- RELOJ + ÚLTIMA LECTURA EN SUPABASE ----------------
+# ---------------- RELOJ ----------------
 now_ui = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
 
 last_updated = None
@@ -87,11 +94,7 @@ with c_time1:
     )
 
 with c_time2:
-    if last_updated is not None and pd.notna(last_updated):
-        ultima_txt = last_updated.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        ultima_txt = "—"
-
+    ultima_txt = last_updated.strftime('%Y-%m-%d %H:%M:%S') if last_updated is not None else "—"
     st.markdown(
         f"""
         <div style="text-align:right;">
@@ -100,9 +103,8 @@ with c_time2:
         """,
         unsafe_allow_html=True
     )
+
 st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
-
-
 
 # ---------------- VALIDACIONES ----------------
 missing = [c for c in [COL_OS_DB, COL_FECHA_DB] if c not in df.columns]
@@ -114,12 +116,9 @@ if df.empty:
     st.warning("Supabase respondió OK, pero no hay filas en la tabla todavía.")
     st.stop()
 
-
-
 # -------------------- FECHAS --------------------
 dt = pd.to_datetime(df[COL_FECHA_DB], errors="coerce")
 
-# Si viene tz-aware, convertir a UTC y luego quitar tz
 try:
     if getattr(dt.dt, "tz", None) is not None:
         dt = dt.dt.tz_convert("UTC").dt.tz_localize(None)
@@ -129,8 +128,6 @@ except Exception:
 df[COL_FECHA_DB] = dt
 df["fecha_programacion_display"] = df[COL_FECHA_DB].dt.strftime("%Y-%m-%d %H:%M:%S").astype(str)
 
-
-# NOW PARA CALCULOS CON CHILE
 now = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
 
 def human_diff(target_dt: datetime):
@@ -147,7 +144,7 @@ def human_diff(target_dt: datetime):
         h, r = divmod(s_left, 3600)
         m, s = divmod(r, 60)
 
-        if s_left <= 1800:  # < 30m
+        if s_left <= 1800:
             estado = "URGENTE"
             detalle = f"⚠️ Faltan {h}h {m}m {s}s"
         else:
@@ -169,21 +166,10 @@ for dtx in df[COL_FECHA_DB]:
 df["EstadoTiempo"] = estados
 df["DetalleTiempo"] = detalles
 
-
-
 # ---------------- KPIs ----------------
 vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
 urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
-
-st.markdown("""
-<style>
-.kpi-title {
-    font-weight: bold !important;
-    font-size: 1.1rem !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
 
@@ -191,27 +177,29 @@ with c1:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
-        <div class="kpi-title"><b>Vencidos</b></div>
+        <div class="kpi-title">Vencidos</div>
         <div class="kpi-value" style="color:red;">{vencidos}</div>
     </div>
     """,
         unsafe_allow_html=True,
     )
+
 with c2:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
-        <div class="kpi-title"><b>Urgentes (&lt;30m)</b></div>
+        <div class="kpi-title">Urgentes (&lt;30m)</div>
         <div class="kpi-value" style="color:orange;">{urgentes}</div>
     </div>
     """,
         unsafe_allow_html=True,
     )
+
 with c3:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
-        <div class="kpi-title"><b>Por vencer</b></div>
+        <div class="kpi-title">Por vencer</div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
     """,
@@ -220,22 +208,11 @@ with c3:
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-
-
-# ---------------- GRÁFICO DE ANILLOS POR ESTADO ----------------
-dist_estado = (
-    df.groupby("EstadoTiempo")
-      .size()
-      .reset_index(name="cantidad")
-)
-
-
-
-# CALCULAR PORCENTAJES
+# ---------------- GRÁFICO ----------------
+dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
 total = dist_estado["cantidad"].sum()
 dist_estado["porcentaje"] = (dist_estado["cantidad"] / total * 100).round(1)
 
-# COLORES PERSONALIZADOS
 color_scale = alt.Scale(
     domain=["VENCIDO", "URGENTE", "POR VENCER"],
     range=["#FF5252", "#FFA500", "#FFF176"]
@@ -249,17 +226,13 @@ donut_chart = (
         color=alt.Color(
             "EstadoTiempo:N",
             scale=color_scale,
-            legend=alt.Legend(
-                title="EstadoTiempo",
-                titleFontWeight="bold",
-                labelFontWeight="normal"
-            )
+            legend=alt.Legend(title="EstadoTiempo", titleFontWeight="bold")
         ),
         tooltip=[
             alt.Tooltip("EstadoTiempo:N", title="Estado"),
             alt.Tooltip("cantidad:Q", title="Cantidad"),
             alt.Tooltip("porcentaje:Q", title="Porcentaje (%)")
-        ]
+        ],
     )
     .properties(height=420)
 )
@@ -268,21 +241,15 @@ with st.expander("Gráfico de servicios por estado"):
     st.subheader("Distribución de servicios por estado")
     st.altair_chart(donut_chart, use_container_width=True)
 
-st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
 # ---------------- ORDEN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
 df["_ord"] = df["EstadoTiempo"].map(order_map).fillna(99)
 df = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"])
 
-
-
-# ---------------- PARPADEO (URGENTE <30m) ----------------
+# ---------------- PARPADEO ----------------
 blink_on = (datetime.now(ZoneInfo("America/Santiago")).second % 2 == 0)
 
-
-
-# ---------------- TABLA BASE ----------------
+# ---------------- TABLA ----------------
 tabla = df[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
 tabla = tabla.rename(
     columns={
@@ -291,9 +258,6 @@ tabla = tabla.rename(
     }
 ).reset_index(drop=True)
 
-
-
-# ICONO DE RIESGO
 def icono_estado(est):
     if est == "VENCIDO":
         return "🔴"
@@ -304,34 +268,22 @@ def icono_estado(est):
     return "⚪"
 
 tabla["Riesgo"] = tabla["EstadoTiempo"].apply(icono_estado)
-
-# REORDENAR COLUMNAS PARA QUE RIESGO VAYA PRIMERO
 tabla = tabla[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
 
-
-
-# ---------------- ROTACIÓN DE VISTAS (VENCIDOS vs URGENTES+POR VENCER) ----------------
-ROTATION_WINDOW = 15  #Cada 15 segundos
-
-try:
-    phase = (refresh_counter // ROTATION_WINDOW) % 2
-except NameError:
-    phase = 0  # por si se ejecuta sin autorefresh
+# ---------------- ROTACIÓN 15s ----------------
+ROTATION_WINDOW = 15
+phase = (refresh_counter // ROTATION_WINDOW) % 2
 
 if phase == 0:
-    # Vista 1: solo vencidos
     tabla_view = tabla[tabla["EstadoTiempo"] == "VENCIDO"].copy()
     view_title = "Servicios Vencidos"
 else:
-    # Vista 2: urgentes + por vencer
     tabla_view = tabla[tabla["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])].copy()
     view_title = "Servicios Urgentes y Por Vencer"
 
 st.subheader(view_title)
 
-
-
-# ---------------- ESTILOS FILAS ----------------
+# ---------------- ESTILOS DE FILA ----------------
 def style_row(row):
     styles = [""] * len(row)
     idx_riesgo = row.index.get_loc("Riesgo")
@@ -358,14 +310,3 @@ def style_row(row):
 
 styled_df = tabla_view.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
-
-
-
-
-
-
-
-
-
-
-
