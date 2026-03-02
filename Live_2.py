@@ -65,7 +65,7 @@ h1 {
 # AUTOREFRESH (cada 1 segundo)
 refresh_counter = st_autorefresh(interval=1000, key="refresh")
 
-st.title("Vencimientos Servicios de ")
+st.title("Vencimientos Servicios de HOY")
 
 # ---------------- LOAD DATA ----------------
 def load_data_from_supabase() -> pd.DataFrame:
