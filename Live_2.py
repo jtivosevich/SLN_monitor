@@ -66,7 +66,6 @@ h1 {
 refresh_counter = st_autorefresh(interval=1000, key="refresh")
 
 st.title("Servicios de HOY")
-st.write("VERSIÓN DEBUG 1 - " + datetime.now().strftime("%H:%M:%S"))
 
 # ---------------- LOAD DATA ----------------
 def load_data_from_supabase() -> pd.DataFrame:
