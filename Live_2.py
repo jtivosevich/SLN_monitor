@@ -8,7 +8,7 @@ import altair as alt
 
 # ---------------- SUPABASE ----------------
 SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["anon_key"]  # SECRET KEY
+SUPABASE_KEY = st.secrets["supabase"]["anon_key"]
 SUPABASE_TABLE = "programacion_transporte"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -35,13 +35,6 @@ h1 { margin-bottom: 0.2rem !important; }
     display: flex;
     flex-direction: column;
     justify-content: center;
-}
-
-/* 🔥 TITULO DE TARJETAS EN NEGRITA Y MÁS GRANDE */
-.kpi-title {
-    font-size: 18px;
-    font-weight: 800;
-    opacity: 1;
 }
 
 .kpi-value {
@@ -116,7 +109,7 @@ if df.empty:
     st.warning("Supabase respondió OK, pero no hay filas en la tabla todavía.")
     st.stop()
 
-# -------------------- FECHAS --------------------
+# ---------------- FECHAS ----------------
 dt = pd.to_datetime(df[COL_FECHA_DB], errors="coerce")
 
 try:
@@ -135,8 +128,7 @@ def human_diff(target_dt: datetime):
 
     if diff_seconds >= 0:
         estado = "VENCIDO"
-        s = diff_seconds
-        h, r = divmod(s, 3600)
+        h, r = divmod(diff_seconds, 3600)
         m, s = divmod(r, 60)
         detalle = f"Lleva vencido {h}h {m}m {s}s"
     else:
@@ -166,7 +158,7 @@ for dtx in df[COL_FECHA_DB]:
 df["EstadoTiempo"] = estados
 df["DetalleTiempo"] = detalles
 
-# ---------------- KPIs ----------------
+# ---------------- KPIs FINALES (TÍTULOS EN NEGRITA) ----------------
 vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
 urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
@@ -177,7 +169,9 @@ with c1:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
-        <div class="kpi-title">Vencidos</div>
+        <div style="font-weight:900; font-size:20px; opacity:1; margin-bottom:4px;">
+            Vencidos
+        </div>
         <div class="kpi-value" style="color:red;">{vencidos}</div>
     </div>
     """,
@@ -188,7 +182,9 @@ with c2:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
-        <div class="kpi-title">Urgentes (&lt;30m)</div>
+        <div style="font-weight:900; font-size:20px; opacity:1; margin-bottom:4px;">
+            Urgentes (&lt;30m)
+        </div>
         <div class="kpi-value" style="color:orange;">{urgentes}</div>
     </div>
     """,
@@ -199,7 +195,9 @@ with c3:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
-        <div class="kpi-title">Por vencer</div>
+        <div style="font-weight:900; font-size:20px; opacity:1; margin-bottom:4px;">
+            Por vencer
+        </div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
     """,
@@ -252,10 +250,7 @@ blink_on = (datetime.now(ZoneInfo("America/Santiago")).second % 2 == 0)
 # ---------------- TABLA ----------------
 tabla = df[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
 tabla = tabla.rename(
-    columns={
-        COL_OS_DB: "O/S",
-        "fecha_programacion_display": "Fecha Programación de servicio",
-    }
+    columns={COL_OS_DB: "O/S", "fecha_programacion_display": "Fecha Programación de servicio"}
 ).reset_index(drop=True)
 
 def icono_estado(est):
@@ -283,7 +278,7 @@ else:
 
 st.subheader(view_title)
 
-# ---------------- ESTILOS DE FILA ----------------
+# ---------------- ESTILOS FILA ----------------
 def style_row(row):
     styles = [""] * len(row)
     idx_riesgo = row.index.get_loc("Riesgo")
@@ -293,6 +288,7 @@ def style_row(row):
     if row["EstadoTiempo"] == "VENCIDO":
         styles[idx_estado] = "color:red; font-weight:900;"
         styles[idx_riesgo] = "font-size:20px;"
+
     elif row["EstadoTiempo"] == "URGENTE":
         if blink_on:
             styles[idx_estado] = "color:orange; font-weight:900;"
@@ -302,6 +298,7 @@ def style_row(row):
             styles[idx_estado] = "color:rgba(255,165,0,0.25); font-weight:900;"
             styles[idx_detalle] = "color:rgba(255,165,0,0.25); font-weight:800;"
             styles[idx_riesgo] = "font-size:20px; opacity:0.25;"
+
     elif row["EstadoTiempo"] == "POR VENCER":
         styles[idx_estado] = "color:#FFF176; font-weight:900;"
         styles[idx_riesgo] = "font-size:20px;"
