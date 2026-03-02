@@ -24,12 +24,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# Estilos globales
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
-
 .block-container { 
     padding-top: 0.6rem !important; 
     padding-bottom: 0.8rem !important; 
@@ -54,17 +51,7 @@ h1 {
     justify-content: center;
 }
 
-/* 🔥 TÍTULOS DE LAS TARJETAS */
-.kpi-title {
-    font-family: 'Inter', sans-serif !important;
-    font-weight: 800 !important;
-    font-size: 20px !important;
-    color: #FFFFFF !important;
-    opacity: 1 !important;
-    margin-bottom: 4px;
-}
-
-/* Valor numérico */
+/* Valor numérico de las tarjetas */
 .kpi-value {
     font-size: 46px;
     font-weight: 900;
@@ -198,7 +185,9 @@ with c1:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
-        <div class="kpi-title">Vencidos</div>
+        <div style="font-weight:900; font-size:22px; text-transform:uppercase; color:#FFFFFF; margin-bottom:4px;">
+            Vencidos
+        </div>
         <div class="kpi-value" style="color:red;">{vencidos}</div>
     </div>
     """,
@@ -209,7 +198,9 @@ with c2:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
-        <div class="kpi-title">Urgentes (&lt;30m)</div>
+        <div style="font-weight:900; font-size:22px; text-transform:uppercase; color:#FFFFFF; margin-bottom:4px;">
+            Urgentes (&lt;30m)
+        </div>
         <div class="kpi-value" style="color:orange;">{urgentes}</div>
     </div>
     """,
@@ -220,7 +211,9 @@ with c3:
     st.markdown(
         f"""
     <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
-        <div class="kpi-title">Por vencer</div>
+        <div style="font-weight:900; font-size:22px; text-transform:uppercase; color:#FFFFFF; margin-bottom:4px;">
+            Por vencer
+        </div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
     """,
