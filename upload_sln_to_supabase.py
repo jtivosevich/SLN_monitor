@@ -19,7 +19,7 @@ def require_env(name: str) -> str:
 TZ_CL = ZoneInfo("America/Santiago")
 
 # =========================
-# SLN CONFIG
+# SLN CONFIGURACION
 # =========================
 SLN_URL = "https://sistemalogistico.dycsa.cl"
 SLN_USER = require_env("SLN_USER")
@@ -33,16 +33,11 @@ COL_OS = "O/S"
 COL_FECHA = "Fecha Programación de servicio"
 
 # =========================
-# SUPABASE CONFIG
+# SUPABASE CONFIGURACION
 # =========================
 SUPABASE_URL = require_env("SUPABASE_URL")
 SUPABASE_KEY = require_env("SUPABASE_SECRET")  # secret/service role
 SUPABASE_TABLE = "programacion_transporte"
-
-# RPC que debes haber creado en Supabase:
-# create or replace function public.truncate_programacion()
-# returns void language sql security definer
-# as $$ truncate table public.programacion_transporte; $$;
 SUPABASE_RPC_TRUNCATE = "truncate_programacion"
 
 
