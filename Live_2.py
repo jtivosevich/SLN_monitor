@@ -200,38 +200,38 @@ st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 # ---------------- GRÁFICO ----------------
 
-dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
-total = dist_estado["cantidad"].sum()
-dist_estado["porcentaje"] = (dist_estado["cantidad"] / total * 100).round(1)
+# dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
+# total = dist_estado["cantidad"].sum()
+# dist_estado["porcentaje"] = (dist_estado["cantidad"] / total * 100).round(1)
 
-color_scale = alt.Scale(
-    domain=["VENCIDO", "URGENTE", "POR VENCER"],
-    range=["#FF5252", "#FFA500", "#FFF176"]
-)
+# color_scale = alt.Scale(
+#     domain=["VENCIDO", "URGENTE", "POR VENCER"],
+#     range=["#FF5252", "#FFA500", "#FFF176"]
+# )
 
-donut_chart = (
-    alt.Chart(dist_estado)
-    .mark_arc(innerRadius=60)
-    .encode(
-        theta="cantidad:Q",
-        color=alt.Color(
-            "EstadoTiempo:N",
-            scale=color_scale,
-            legend=alt.Legend(title="EstadoTiempo", titleFontWeight="bold")
-        ),
-        tooltip=[
-            alt.Tooltip("EstadoTiempo:N", title="Estado"),
-            alt.Tooltip("cantidad:Q", title="Cantidad"),
-            alt.Tooltip("porcentaje:Q", title="Porcentaje (%)")
-        ]
-    ).properties(height=420)
-)
+# donut_chart = (
+#     alt.Chart(dist_estado)
+#     .mark_arc(innerRadius=60)
+#     .encode(
+#         theta="cantidad:Q",
+#         color=alt.Color(
+#             "EstadoTiempo:N",
+#             scale=color_scale,
+#             legend=alt.Legend(title="EstadoTiempo", titleFontWeight="bold")
+#         ),
+#         tooltip=[
+#             alt.Tooltip("EstadoTiempo:N", title="Estado"),
+#             alt.Tooltip("cantidad:Q", title="Cantidad"),
+#             alt.Tooltip("porcentaje:Q", title="Porcentaje (%)")
+#         ]
+#     ).properties(height=420)
+# )
 
-with st.expander("Gráfico de servicios por estado"):
-    st.subheader("Distribución de servicios por estado")
-    st.altair_chart(donut_chart, use_container_width=True)
+# with st.expander("Gráfico de servicios por estado"):
+#     st.subheader("Distribución de servicios por estado")
+#     st.altair_chart(donut_chart, use_container_width=True)
 
-st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+# st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 
 # ---------------- TABLA Y ROTACIÓN ----------------
