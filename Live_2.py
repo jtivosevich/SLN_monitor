@@ -39,7 +39,7 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 }
 
 .kpi-title {
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 600;
     opacity: 0.9;
     text-transform: none !important;   /* <<< SIN MAYÚSCULAS */
@@ -196,7 +196,7 @@ with c3:
     """, unsafe_allow_html=True)
 
 
-st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 # ---------------- GRÁFICO ----------------
 dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
