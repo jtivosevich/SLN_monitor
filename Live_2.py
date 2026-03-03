@@ -39,14 +39,14 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 }
 
 .kpi-title {
-    font-size: 20px;        /* TITULO KPI MÁS GRANDE */
-    font-weight: 700;
-    opacity: 1;
-    text-transform: none !important;
+    font-size: 20px;
+    font-weight: 600;
+    opacity: 0.9;
+    text-transform: none !important;   /* <<< SIN MAYÚSCULAS */
 }
 
 .kpi-value {
-    font-size: 46px;
+    font-size: 40px;        /* <<< MÁS PEQUEÑO */
     font-weight: 800;
     line-height: 1.1;
 }
@@ -69,6 +69,7 @@ def load_data_from_supabase() -> pd.DataFrame:
     return pd.DataFrame(data)
 
 df = load_data_from_supabase()
+
 
 # ---------------- RELOJ + ÚLTIMA LECTURA ----------------
 now_ui = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
@@ -108,6 +109,7 @@ if missing:
 if df.empty:
     st.warning("Supabase respondió OK, pero no hay filas en la tabla todavía.")
     st.stop()
+
 
 # ---------------- FECHAS ----------------
 dt = pd.to_datetime(df[COL_FECHA_DB], errors="coerce")
@@ -193,8 +195,8 @@ with c3:
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
+st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 # ---------------- GRÁFICO ----------------
 dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
@@ -239,21 +241,19 @@ df = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"])
 blink_on = (datetime.now(ZoneInfo("America/Santiago")).second % 2 == 0)
 
 tabla = df[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
-
-# 🔥 AQUI SE CAMBIA EL NOMBRE DEL TÍTULO
 tabla = tabla.rename(columns={
-    "EstadoTiempo": "Estado"
+    COL_OS_DB: "O/S",
+    "fecha_programacion_display": "Fecha Programación de servicio",
 })
 
-tabla["Riesgo"] = tabla["Estado"].apply(icono_estado)
+def icono_estado(est):
+    if est == "VENCIDO": return "🔴"
+    if est == "URGENTE": return "🟠"
+    if est == "POR VENCER": return "🟡"
+    return "⚪"
 
-tabla = tabla[[
-    "Riesgo",
-    COL_OS_DB,
-    "fecha_programacion_display",
-    "Estado",
-    "DetalleTiempo"
-]]
+tabla["Riesgo"] = tabla["EstadoTiempo"].apply(icono_estado)
+tabla = tabla[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
 
 ROTATION_WINDOW = 15
 try:
@@ -262,10 +262,10 @@ except NameError:
     phase = 0
 
 if phase == 0:
-    tabla_view = tabla[tabla["Estado"] == "VENCIDO"].copy()
+    tabla_view = tabla[tabla["EstadoTiempo"] == "VENCIDO"].copy()
     view_title = "Servicios Vencidos"
 else:
-    tabla_view = tabla[tabla["Estado"].isin(["URGENTE", "POR VENCER"])].copy()
+    tabla_view = tabla[tabla["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])].copy()
     view_title = "Servicios Urgentes y Por Vencer"
 
 st.subheader(view_title)
@@ -274,13 +274,13 @@ st.subheader(view_title)
 def style_row(row):
     styles = [""] * len(row)
     idx_riesgo = row.index.get_loc("Riesgo")
-    idx_estado = row.index.get_loc("Estado")
+    idx_estado = row.index.get_loc("EstadoTiempo")
     idx_detalle = row.index.get_loc("DetalleTiempo")
 
-    if row["Estado"] == "VENCIDO":
+    if row["EstadoTiempo"] == "VENCIDO":
         styles[idx_estado] = "color:red; font-weight:900;"
         styles[idx_riesgo] = "font-size:20px;"
-    elif row["Estado"] == "URGENTE":
+    elif row["EstadoTiempo"] == "URGENTE":
         if blink_on:
             styles[idx_estado] = "color:orange; font-weight:900;"
             styles[idx_detalle] = "color:orange; font-weight:800;"
@@ -289,7 +289,7 @@ def style_row(row):
             styles[idx_estado] = "color:rgba(255,165,0,0.25); font-weight:900;"
             styles[idx_detalle] = "color:rgba(255,165,0,0.25); font-weight:800;"
             styles[idx_riesgo] = "font-size:20px; opacity:0.25;"
-    elif row["Estado"] == "POR VENCER":
+    elif row["EstadoTiempo"] == "POR VENCER":
         styles[idx_estado] = "color:#FFF176; font-weight:900;"
         styles[idx_riesgo] = "font-size:20px;"
 
