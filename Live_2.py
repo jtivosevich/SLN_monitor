@@ -199,7 +199,7 @@ with c3:
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 # ---------------- GRÁFICO ----------------
-'''
+
 dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
 total = dist_estado["cantidad"].sum()
 dist_estado["porcentaje"] = (dist_estado["cantidad"] / total * 100).round(1)
@@ -232,7 +232,6 @@ with st.expander("Gráfico de servicios por estado"):
     st.altair_chart(donut_chart, use_container_width=True)
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-'''
 
 
 # ---------------- TABLA Y ROTACIÓN ----------------
