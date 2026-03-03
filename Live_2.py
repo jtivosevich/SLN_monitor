@@ -196,7 +196,7 @@ with c3:
     """, unsafe_allow_html=True)
 
 
-st.markdown("<div style='height:13px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
 # ---------------- GRÁFICO ----------------
 dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
