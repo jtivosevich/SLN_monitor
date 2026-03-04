@@ -42,7 +42,7 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 20px;
     font-weight: 600;
     opacity: 0.9;
-    text-transform: none !important;   /* SIN MAYÚSCULAS */
+    text-transform: none !important;
 }
 
 .kpi-value {
@@ -51,7 +51,7 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     line-height: 1.1;
 }
 
-/* KPI 4: texto extra */
+/* KPI texto extra */
 .kpi-sub {
     margin-top: 6px;
     font-size: 14px;
@@ -165,7 +165,7 @@ for dtx in df[COL_FECHA_DB]:
 df["EstadoTiempo"] = estados
 df["DetalleTiempo"] = detalles
 
-# ---------------- PRÓXIMO VENCIMIENTO (KPI 4) - SOPORTA EMPATES ----------------
+# ---------------- PRÓXIMO VENCIMIENTO (KPI 4 + DESPLEGABLE) ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
 
 next_dt = None
@@ -180,38 +180,25 @@ if not df_valid.empty:
     futuros = df_valid[df_valid[COL_FECHA_DB] >= now].copy()
 
     if not futuros.empty:
-        # Próxima fecha futura (mínima)
         next_dt = futuros[COL_FECHA_DB].min()
         grupo = futuros[futuros[COL_FECHA_DB] == next_dt].copy()
     else:
-        # Si no hay futuros: tomamos la fecha vencida más reciente (máxima)
         next_dt = df_valid[COL_FECHA_DB].max()
         grupo = df_valid[df_valid[COL_FECHA_DB] == next_dt].copy()
 
-    # Estado/detalle: si hay mezcla por cualquier razón, tomamos el "peor"
     prio = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 99}
     grupo["_prio"] = grupo["EstadoTiempo"].map(prio).fillna(99)
-    row_rep = grupo.sort_values("_prio").iloc[0]  # representante
+    row_rep = grupo.sort_values("_prio").iloc[0]
 
     next_estado = row_rep["EstadoTiempo"]
     next_detalle = row_rep["DetalleTiempo"]
     next_fecha_txt = next_dt.strftime("%Y-%m-%d %H:%M:%S")
 
-    # Lista de OS (únicas, ordenadas)
     next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
     next_count = len(next_os_list)
 
-    # Texto compacto para el KPI
-    MAX_OS_SHOW = 3
-    if next_count == 1:
-        next_os_text = f"O/S {next_os_list[0]}"
-    else:
-        shown = ", ".join(next_os_list[:MAX_OS_SHOW])
-        extra = next_count - MAX_OS_SHOW
-        if extra > 0:
-            next_os_text = f"{next_count} O/S: {shown} +{extra}"
-        else:
-            next_os_text = f"{next_count} O/S: {shown}"
+    # KPI compacto: solo cantidad
+    next_os_text = f"{next_count} O/S" if next_count > 0 else "—"
 
 # ---------------- KPIs ----------------
 vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
@@ -245,7 +232,6 @@ with c3:
     """, unsafe_allow_html=True)
 
 with c4:
-    # Colores por estado (si es futuro, normalmente será POR VENCER o URGENTE)
     color_map = {"VENCIDO": "red", "URGENTE": "orange", "POR VENCER": "#FFF176"}
     bg_map = {
         "VENCIDO": "rgba(255,0,0,0.10)",
@@ -259,12 +245,22 @@ with c4:
     st.markdown(f"""
     <div class="kpi-card" style="background:{bg}; border-left:8px solid {line_color};">
         <div class="kpi-title">Próximo vencimiento</div>
-        <div class="kpi-value" style="font-size:28px; color:{line_color};">{next_os_text}</div>
+        <div class="kpi-value" style="font-size:34px; color:{line_color};">{next_os_text}</div>
         <div class="kpi-sub">{next_fecha_txt} • {next_detalle}</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+# ---------------- DESPLEGABLE: DETALLE PRÓXIMO VENCIMIENTO ----------------
+if next_count > 0 and next_dt is not None:
+    with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
+        detalle_next = df_valid[df_valid[COL_FECHA_DB] == next_dt].copy()
+        detalle_next["Fecha Programación de servicio"] = detalle_next[COL_FECHA_DB].dt.strftime("%Y-%m-%d %H:%M:%S")
+        detalle_next = detalle_next.rename(columns={COL_OS_DB: "O/S"})
+        detalle_next = detalle_next[["O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
+        detalle_next = detalle_next.sort_values(by=["EstadoTiempo", "O/S"])
+        st.dataframe(detalle_next, use_container_width=True, hide_index=True, height=240)
 
 # ---------------- TABLA Y ROTACIÓN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
