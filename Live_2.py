@@ -42,17 +42,24 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 20px;
     font-weight: 600;
     opacity: 0.9;
-    text-transform: none !important;   /* <<< SIN MAYÚSCULAS */
+    text-transform: none !important;   /* SIN MAYÚSCULAS */
 }
 
 .kpi-value {
-    font-size: 40px;        /* <<< MÁS PEQUEÑO */
+    font-size: 40px;
     font-weight: 800;
     line-height: 1.1;
 }
+
+/* KPI 4: texto extra */
+.kpi-sub {
+    margin-top: 6px;
+    font-size: 14px;
+    opacity: 0.85;
+    line-height: 1.2;
+}
 </style>
 """, unsafe_allow_html=True)
-
 
 # AUTOREFRESH
 refresh_counter = st_autorefresh(interval=1000, key="refresh")
@@ -69,7 +76,6 @@ def load_data_from_supabase() -> pd.DataFrame:
     return pd.DataFrame(data)
 
 df = load_data_from_supabase()
-
 
 # ---------------- RELOJ + ÚLTIMA LECTURA ----------------
 now_ui = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
@@ -99,7 +105,6 @@ with c_time2:
 
 st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
 
-
 # ---------------- VALIDACIONES ----------------
 missing = [c for c in [COL_OS_DB, COL_FECHA_DB] if c not in df.columns]
 if missing:
@@ -109,7 +114,6 @@ if missing:
 if df.empty:
     st.warning("Supabase respondió OK, pero no hay filas en la tabla todavía.")
     st.stop()
-
 
 # ---------------- FECHAS ----------------
 dt = pd.to_datetime(df[COL_FECHA_DB], errors="coerce")
@@ -124,7 +128,6 @@ df[COL_FECHA_DB] = dt
 df["fecha_programacion_display"] = df[COL_FECHA_DB].dt.strftime("%Y-%m-%d %H:%M:%S").astype(str)
 
 now = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
-
 
 def human_diff(target_dt: datetime):
     diff_seconds = int((now - target_dt).total_seconds())
@@ -149,7 +152,6 @@ def human_diff(target_dt: datetime):
 
     return estado, detalle
 
-
 estados, detalles = [], []
 for dtx in df[COL_FECHA_DB]:
     if pd.isna(dtx):
@@ -163,13 +165,60 @@ for dtx in df[COL_FECHA_DB]:
 df["EstadoTiempo"] = estados
 df["DetalleTiempo"] = detalles
 
+# ---------------- PRÓXIMO VENCIMIENTO (KPI 4) - SOPORTA EMPATES ----------------
+df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
+
+next_dt = None
+next_estado = "—"
+next_detalle = "—"
+next_count = 0
+next_os_list = []
+next_os_text = "—"
+next_fecha_txt = "—"
+
+if not df_valid.empty:
+    futuros = df_valid[df_valid[COL_FECHA_DB] >= now].copy()
+
+    if not futuros.empty:
+        # Próxima fecha futura (mínima)
+        next_dt = futuros[COL_FECHA_DB].min()
+        grupo = futuros[futuros[COL_FECHA_DB] == next_dt].copy()
+    else:
+        # Si no hay futuros: tomamos la fecha vencida más reciente (máxima)
+        next_dt = df_valid[COL_FECHA_DB].max()
+        grupo = df_valid[df_valid[COL_FECHA_DB] == next_dt].copy()
+
+    # Estado/detalle: si hay mezcla por cualquier razón, tomamos el "peor"
+    prio = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 99}
+    grupo["_prio"] = grupo["EstadoTiempo"].map(prio).fillna(99)
+    row_rep = grupo.sort_values("_prio").iloc[0]  # representante
+
+    next_estado = row_rep["EstadoTiempo"]
+    next_detalle = row_rep["DetalleTiempo"]
+    next_fecha_txt = next_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Lista de OS (únicas, ordenadas)
+    next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
+    next_count = len(next_os_list)
+
+    # Texto compacto para el KPI
+    MAX_OS_SHOW = 3
+    if next_count == 1:
+        next_os_text = f"O/S {next_os_list[0]}"
+    else:
+        shown = ", ".join(next_os_list[:MAX_OS_SHOW])
+        extra = next_count - MAX_OS_SHOW
+        if extra > 0:
+            next_os_text = f"{next_count} O/S: {shown} +{extra}"
+        else:
+            next_os_text = f"{next_count} O/S: {shown}"
 
 # ---------------- KPIs ----------------
 vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
 urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
 
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     st.markdown(f"""
@@ -195,44 +244,27 @@ with c3:
     </div>
     """, unsafe_allow_html=True)
 
+with c4:
+    # Colores por estado (si es futuro, normalmente será POR VENCER o URGENTE)
+    color_map = {"VENCIDO": "red", "URGENTE": "orange", "POR VENCER": "#FFF176"}
+    bg_map = {
+        "VENCIDO": "rgba(255,0,0,0.10)",
+        "URGENTE": "rgba(255,165,0,0.14)",
+        "POR VENCER": "rgba(255,241,118,0.18)"
+    }
+
+    line_color = color_map.get(next_estado, "#66D9FF")
+    bg = bg_map.get(next_estado, "rgba(102,217,255,0.10)")
+
+    st.markdown(f"""
+    <div class="kpi-card" style="background:{bg}; border-left:8px solid {line_color};">
+        <div class="kpi-title">Próximo vencimiento</div>
+        <div class="kpi-value" style="font-size:28px; color:{line_color};">{next_os_text}</div>
+        <div class="kpi-sub">{next_fecha_txt} • {next_detalle}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
-# ---------------- GRÁFICO ----------------
-
-# dist_estado = df.groupby("EstadoTiempo").size().reset_index(name="cantidad")
-# total = dist_estado["cantidad"].sum()
-# dist_estado["porcentaje"] = (dist_estado["cantidad"] / total * 100).round(1)
-
-# color_scale = alt.Scale(
-#     domain=["VENCIDO", "URGENTE", "POR VENCER"],
-#     range=["#FF5252", "#FFA500", "#FFF176"]
-# )
-
-# donut_chart = (
-#     alt.Chart(dist_estado)
-#     .mark_arc(innerRadius=60)
-#     .encode(
-#         theta="cantidad:Q",
-#         color=alt.Color(
-#             "EstadoTiempo:N",
-#             scale=color_scale,
-#             legend=alt.Legend(title="EstadoTiempo", titleFontWeight="bold")
-#         ),
-#         tooltip=[
-#             alt.Tooltip("EstadoTiempo:N", title="Estado"),
-#             alt.Tooltip("cantidad:Q", title="Cantidad"),
-#             alt.Tooltip("porcentaje:Q", title="Porcentaje (%)")
-#         ]
-#     ).properties(height=420)
-# )
-
-# with st.expander("Gráfico de servicios por estado"):
-#     st.subheader("Distribución de servicios por estado")
-#     st.altair_chart(donut_chart, use_container_width=True)
-
-# st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
 
 # ---------------- TABLA Y ROTACIÓN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
@@ -271,7 +303,6 @@ else:
 
 st.subheader(view_title)
 
-
 def style_row(row):
     styles = [""] * len(row)
     idx_riesgo = row.index.get_loc("Riesgo")
@@ -295,7 +326,6 @@ def style_row(row):
         styles[idx_riesgo] = "font-size:20px;"
 
     return styles
-
 
 styled_df = tabla_view.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
