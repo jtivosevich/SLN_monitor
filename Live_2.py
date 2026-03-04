@@ -42,21 +42,13 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 20px;
     font-weight: 600;
     opacity: 0.9;
-    text-transform: none !important;
+    text-transform: none !important;   /* SIN MAYÚSCULAS */
 }
 
 .kpi-value {
     font-size: 40px;
     font-weight: 800;
     line-height: 1.1;
-}
-
-/* KPI texto extra */
-.kpi-sub {
-    margin-top: 6px;
-    font-size: 14px;
-    opacity: 0.85;
-    line-height: 1.2;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -165,16 +157,11 @@ for dtx in df[COL_FECHA_DB]:
 df["EstadoTiempo"] = estados
 df["DetalleTiempo"] = detalles
 
-# ---------------- PRÓXIMO VENCIMIENTO (KPI 4 + DESPLEGABLE) ----------------
+# ---------------- PRÓXIMO VENCIMIENTO (LISTA SOLO O/S) ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
-
 next_dt = None
-next_estado = "—"
-next_detalle = "—"
 next_count = 0
 next_os_list = []
-next_os_text = "—"
-next_fecha_txt = "—"
 
 if not df_valid.empty:
     futuros = df_valid[df_valid[COL_FECHA_DB] >= now].copy()
@@ -186,26 +173,15 @@ if not df_valid.empty:
         next_dt = df_valid[COL_FECHA_DB].max()
         grupo = df_valid[df_valid[COL_FECHA_DB] == next_dt].copy()
 
-    prio = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 99}
-    grupo["_prio"] = grupo["EstadoTiempo"].map(prio).fillna(99)
-    row_rep = grupo.sort_values("_prio").iloc[0]
-
-    next_estado = row_rep["EstadoTiempo"]
-    next_detalle = row_rep["DetalleTiempo"]
-    next_fecha_txt = next_dt.strftime("%Y-%m-%d %H:%M:%S")
-
     next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
     next_count = len(next_os_list)
 
-    # KPI compacto: solo cantidad
-    next_os_text = f"{next_count} O/S" if next_count > 0 else "—"
-
-# ---------------- KPIs ----------------
+# ---------------- KPIs (3) ----------------
 vencidos = int((df["EstadoTiempo"] == "VENCIDO").sum())
 urgentes = int((df["EstadoTiempo"] == "URGENTE").sum())
 por_vencer = int((df["EstadoTiempo"] == "POR VENCER").sum())
 
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3 = st.columns(3)
 
 with c1:
     st.markdown(f"""
@@ -231,36 +207,14 @@ with c3:
     </div>
     """, unsafe_allow_html=True)
 
-with c4:
-    color_map = {"VENCIDO": "red", "URGENTE": "orange", "POR VENCER": "#FFF176"}
-    bg_map = {
-        "VENCIDO": "rgba(255,0,0,0.10)",
-        "URGENTE": "rgba(255,165,0,0.14)",
-        "POR VENCER": "rgba(255,241,118,0.18)"
-    }
-
-    line_color = color_map.get(next_estado, "#66D9FF")
-    bg = bg_map.get(next_estado, "rgba(102,217,255,0.10)")
-
-    st.markdown(f"""
-    <div class="kpi-card" style="background:{bg}; border-left:8px solid {line_color};">
-        <div class="kpi-title">Próximo vencimiento</div>
-        <div class="kpi-value" style="font-size:34px; color:{line_color};">{next_os_text}</div>
-        <div class="kpi-sub">{next_fecha_txt} • {next_detalle}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-# ---------------- DESPLEGABLE: DETALLE PRÓXIMO VENCIMIENTO ----------------
-if next_count > 0 and next_dt is not None:
+# ---------------- DESPLEGABLE: SOLO NÚMEROS DE O/S ----------------
+if next_count > 0:
     with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
-        detalle_next = df_valid[df_valid[COL_FECHA_DB] == next_dt].copy()
-        detalle_next["Fecha Programación de servicio"] = detalle_next[COL_FECHA_DB].dt.strftime("%Y-%m-%d %H:%M:%S")
-        detalle_next = detalle_next.rename(columns={COL_OS_DB: "O/S"})
-        detalle_next = detalle_next[["O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
-        detalle_next = detalle_next.sort_values(by=["EstadoTiempo", "O/S"])
-        st.dataframe(detalle_next, use_container_width=True, hide_index=True, height=240)
+        # Solo una columna con el número de O/S
+        os_only = pd.DataFrame({"O/S": next_os_list})
+        st.dataframe(os_only, use_container_width=True, hide_index=True, height=240)
 
 # ---------------- TABLA Y ROTACIÓN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
