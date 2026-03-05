@@ -261,6 +261,44 @@ with c4:
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
+# ---------------- STATUS STRIP (MONITOR) ----------------
+REFRESH_SECONDS = 1  # tu autorefresh está en 1000 ms
+ROTATION_WINDOW = 15 # el que ya usas
+
+# Cuenta regresiva visual (aprox) para próxima rotación
+secs_to_rotate = ROTATION_WINDOW - (refresh_counter % ROTATION_WINDOW)
+
+# Color del porcentaje (mismo rango que definiste 0-25/26-50/51-75/76-100)
+if efectividad_pct <= 25:
+    eff_color = "red"
+elif efectividad_pct <= 50:
+    eff_color = "orange"
+elif efectividad_pct <= 75:
+    eff_color = "#FFF176"
+else:
+    eff_color = "#00C853"
+
+st.markdown(f"""
+<div style="
+    display:flex; justify-content:space-between; align-items:center;
+    gap:14px; padding:10px 14px; border-radius:12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin: 10px 0 14px 0;
+    font-size: 16px;
+">
+  <div>
+    <span style="margin-right:14px;">🔴 <b>Vencidos:</b> {vencidos}</span>
+    <span style="margin-right:14px;">🟠 <b>Urgentes:</b> {urgentes}</span>
+    <span style="margin-right:14px;">🟡 <b>Por vencer:</b> {por_vencer}</span>
+    <span>✅ <b>Efectividad:</b> <span style="color:{eff_color}; font-weight:900;">{efectividad_pct:.1f}%</span></span>
+  </div>
+  <div style="opacity:0.9;">
+    🔄 <b>Rotación en:</b> {secs_to_rotate}s &nbsp;&nbsp;|&nbsp;&nbsp; 🗄️ <b>Última:</b> {ultima_txt}
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 # ---------------- PRÓXIMO VENCIMIENTO (SOLO SIN TRANSPORTISTA) ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
 
@@ -378,4 +416,5 @@ def style_row(row):
 
 styled_df = tabla_view.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+
 
