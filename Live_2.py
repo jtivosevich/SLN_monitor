@@ -100,7 +100,7 @@ with c_time2:
     ultima_txt = last_updated.strftime('%Y-%m-%d %H:%M:%S') if last_updated else "—"
     st.markdown(f"""
     <div style="text-align:right;">
-        🗄️ Última lectura: <b>{ultima_txt}</b>
+        🗄️ Última actualización: <b>{ultima_txt}</b>
     </div>
     """, unsafe_allow_html=True)
 
@@ -378,3 +378,4 @@ def style_row(row):
 
 styled_df = tabla_view.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+
