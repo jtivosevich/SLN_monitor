@@ -2,10 +2,9 @@ import os
 from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
-
 import pandas as pd
 from playwright.sync_api import sync_playwright
-from supabase import create_client
+from supabase import create_client    
 
 # =========================
 # Helpers
@@ -19,7 +18,7 @@ def require_env(name: str) -> str:
 TZ_CL = ZoneInfo("America/Santiago")
 
 # =========================
-# SLN CONFIGURACION
+# SLN CONFIG
 # =========================
 SLN_URL = "https://sistemalogistico.dycsa.cl"
 SLN_USER = require_env("SLN_USER")
@@ -31,15 +30,16 @@ OPTION_TIPO_FECHA = "Fecha Programación de servicio"
 # CSV
 COL_OS = "O/S"
 COL_FECHA = "Fecha Programación de servicio"
+COL_ESTADO = "Estado Actividad"
+COL_TRANSP = "Transportista"
 
 # =========================
-# SUPABASE CONFIGURACION
+# SUPABASE CONFIG
 # =========================
 SUPABASE_URL = require_env("SUPABASE_URL")
 SUPABASE_KEY = require_env("SUPABASE_SECRET")  # secret/service role
-SUPABASE_TABLE = "programacion_transporte"
-SUPABASE_RPC_TRUNCATE = "truncate_programacion"
-
+SUPABASE_TABLE = "programacion_transporte_test"
+SUPABASE_RPC_TRUNCATE = "truncate_programacion_test"
 
 def limpiar_carpeta(ruta: Path):
     print("[BOT] Limpiando carpeta de descargas...")
@@ -147,6 +147,47 @@ def download_csv_from_sln(download_dir: Path) -> Path:
 
         select_tipo_fecha_with_scroll(page, OPTION_TIPO_FECHA)
 
+        print("[BOT] Seleccionando Estado de Actividad...")
+
+        # 1) Abrir el dropdown de Estado de Actividad
+        try:
+            combo_estado = page.locator(
+                "xpath=(//label[contains(., 'Estado de Actividad')]/following::*[self::span or self::button or self::div][1])"
+            ).first
+            combo_estado.click(force=True)
+        except Exception as e:
+            print("[WARN] Click por label falló:", e)
+            # Último recurso: cualquier elemento que muestre "No Programado"
+            try:
+                page.locator(
+                    "xpath=(//*[normalize-space(text())='No Programado'])[1]"
+                ).click(force=True)
+            except Exception as e2:
+                print("[ERROR] No se pudo abrir Estado de Actividad:", e2)
+                raise
+
+        page.wait_for_timeout(500)
+
+        # 2) Solo agregar "Programado" (No Programado ya viene marcado)
+        try:
+            opcion_programado = page.get_by_text("Programado", exact=True).last
+            opcion_programado.click(force=True)
+        except Exception as e:
+            print("[ERROR] No se pudo hacer click en 'Programado':", e)
+            raise
+
+        # 3) Cerrar el dropdown haciendo click fuera
+        page.wait_for_timeout(200)
+        try:
+            # Título de la página (único)
+            page.get_by_role("heading", name="Programación de Transporte").click()
+        except Exception as e:
+            print("[WARN] No se pudo clickear heading, usando fallback:", e)
+            # Fallback: algún input de filtro (por fuera del dropdown)
+            page.get_by_placeholder("Ingrese texto para buscar...", exact=False).first.click()
+
+        page.wait_for_timeout(300)
+
         print("[BOT] Buscando...")
         page.get_by_text("Buscar", exact=True).click()
 
@@ -179,43 +220,53 @@ def upload_to_supabase(csv_path: Path):
     df = pd.read_csv(csv_path, sep=";", encoding="utf-8-sig")
     print(f"[CSV] Filas CSV: {len(df)}")
 
-    for col in (COL_OS, COL_FECHA):
+    # Validar columnas mínimas
+    for col in (COL_OS, COL_FECHA, COL_ESTADO, COL_TRANSP):
         if col not in df.columns:
             raise RuntimeError(f"Falta columna '{col}'. Columnas: {list(df.columns)}")
 
     df[COL_FECHA] = pd.to_datetime(df[COL_FECHA], errors="coerce", dayfirst=True)
 
-    df2 = df[[COL_OS, COL_FECHA]].dropna().copy()
-    df2[COL_OS] = df2[COL_OS].astype(str).str.strip()
-    print(f"[CSV] Filas válidas (OS+Fecha): {len(df2)}")
+    # Mantener filas con OS y Fecha válidas
+    df2 = df[[COL_OS, COL_FECHA, COL_ESTADO, COL_TRANSP]].copy()
+    df2 = df2.dropna(subset=[COL_OS, COL_FECHA])
 
+    df2[COL_OS] = df2[COL_OS].astype(str).str.strip()
+    df2[COL_ESTADO] = df2[COL_ESTADO].astype(str).str.strip()
+
+    # Transportista puede venir vacío -> lo dejamos como None
+    df2[COL_TRANSP] = df2[COL_TRANSP].where(df2[COL_TRANSP].notna(), None)
+    df2[COL_TRANSP] = df2[COL_TRANSP].apply(lambda x: x.strip() if isinstance(x, str) else x)
+
+    print(f"[CSV] Filas válidas (OS+Fecha): {len(df2)}")
     if df2.empty:
         print("[CSV] Nada que subir (sin filas válidas).")
         return
 
-    # ✅ Si tu tabla es timestamp WITHOUT time zone, sube sin offset
+    # timestamp WITHOUT time zone -> subimos sin offset
     df2["fecha_programacion_str"] = df2[COL_FECHA].dt.strftime("%Y-%m-%d %H:%M:%S")
-
-    # updated_at en Chile (visual)
     updated_at = datetime.now(TZ_CL).strftime("%Y-%m-%d %H:%M:%S")
 
     rows = [
-        {"os": r[COL_OS], "fecha_programacion": r["fecha_programacion_str"], "updated_at": updated_at}
+        {
+            "os": r[COL_OS],
+            "estado_actividad": r[COL_ESTADO],
+            "transportista": r[COL_TRANSP],
+            "fecha_programacion": r["fecha_programacion_str"],
+            "updated_at": updated_at,
+        }
         for _, r in df2.iterrows()
     ]
 
     print(f"[SUPABASE] Filas listas para insertar: {len(rows)}")
 
-    # ===============================
-    # ✅ TRUNCATE TOTAL (borra todo)
-    # ===============================
-    print("[SUPABASE] Truncando tabla completa...")
+    # TRUNCATE + INSERT
+    print("[SUPABASE] Truncando tabla completa (test)...")
     rpc_res = supabase.rpc(SUPABASE_RPC_TRUNCATE).execute()
     if getattr(rpc_res, "error", None):
         raise RuntimeError(rpc_res.error)
-    print("[SUPABASE] ✅ Tabla truncada.")
+    print("[SUPABASE] ✅ Tabla truncada (test).")
 
-    # Insert por lotes
     print("[SUPABASE] Insertando filas...")
     BATCH = 500
     for i in range(0, len(rows), BATCH):
@@ -224,7 +275,7 @@ def upload_to_supabase(csv_path: Path):
         if getattr(ins_res, "error", None):
             raise RuntimeError(ins_res.error)
 
-    print("[SUPABASE] ✅ Subida OK (TRUNCATE + INSERT)")
+    print("[SUPABASE] ✅ Subida OK (TRUNCATE + INSERT) [TEST]")
 
 
 def main():
