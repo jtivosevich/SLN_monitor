@@ -62,7 +62,8 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 """, unsafe_allow_html=True)
 
 # AUTOREFRESH
-refresh_counter = st_autorefresh(interval=1000, key="refresh")
+REFRESH_MS = 1000
+refresh_counter = st_autorefresh(interval=REFRESH_MS, key="refresh")
 
 # TITULO PRINCIPAL
 st.title("Vencimientos Servicios de HOY")
@@ -197,27 +198,8 @@ def efectividad_style(pct: float):
 
 ef = efectividad_style(efectividad)
 
-# ---------------- PRÓXIMO VENCIMIENTO (LISTA SOLO O/S) ----------------
-df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
-next_dt = None
-next_count = 0
-next_os_list = []
-
-if not df_valid.empty:
-    futuros = df_valid[df_valid[COL_FECHA_DB] >= now].copy()
-
-    if not futuros.empty:
-        next_dt = futuros[COL_FECHA_DB].min()
-        grupo = futuros[futuros[COL_FECHA_DB] == next_dt].copy()
-    else:
-        next_dt = df_valid[COL_FECHA_DB].max()
-        grupo = df_valid[df_valid[COL_FECHA_DB] == next_dt].copy()
-
-    next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
-    next_count = len(next_os_list)
-
 # ---------------- KPIs ----------------
-# ✅ Vencidos = SOLO VENCIDOS SIN TRANSPORTISTA
+# ✅ Solo casos SIN transportista
 vencidos = int(((df["EstadoTiempo"] == "VENCIDO") & sin_transportista).sum())
 urgentes = int(((df["EstadoTiempo"] == "URGENTE") & sin_transportista).sum())
 por_vencer = int(((df["EstadoTiempo"] == "POR VENCER") & sin_transportista).sum())
@@ -261,10 +243,33 @@ with c4:
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
+# ---------------- STATUS STRIP (MONITOR) ----------------
+ROTATION_WINDOW = 15  # ya usas 15s
+secs_to_rotate = ROTATION_WINDOW - (refresh_counter % ROTATION_WINDOW)
+
+st.markdown(f"""
+<div style="
+    display:flex; justify-content:space-between; align-items:center;
+    gap:14px; padding:10px 14px; border-radius:12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin: 10px 0 14px 0;
+    font-size: 16px;
+">
+  <div>
+    <span style="margin-right:14px;">🔴 <b>Vencidos:</b> {vencidos}</span>
+    <span style="margin-right:14px;">🟠 <b>Urgentes:</b> {urgentes}</span>
+    <span style="margin-right:14px;">🟡 <b>Por vencer:</b> {por_vencer}</span>
+    <span>✅ <b>Efectividad:</b> <span style="color:{ef['text']}; font-weight:900;">{efectividad:.1f}%</span></span>
+  </div>
+  <div style="opacity:0.9;">
+    🔄 <b>Rotación en:</b> {secs_to_rotate}s &nbsp;&nbsp;|&nbsp;&nbsp; 🗄️ <b>Última:</b> {ultima_txt}
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 # ---------------- PRÓXIMO VENCIMIENTO (SOLO SIN TRANSPORTISTA) ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
-
-# aplicar mismo criterio del dashboard
 df_valid = df_valid[sin_transportista].copy()
 
 next_dt = None
@@ -273,25 +278,17 @@ next_os_list = []
 
 if not df_valid.empty:
     futuros = df_valid[df_valid[COL_FECHA_DB] >= now].copy()
-
     if not futuros.empty:
         next_dt = futuros[COL_FECHA_DB].min()
         grupo = futuros[futuros[COL_FECHA_DB] == next_dt].copy()
-
         next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
         next_count = len(next_os_list)
 
 # ---------------- EXPANDER ----------------
 with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
-
     if next_count > 0:
         os_only = pd.DataFrame({"O/S": next_os_list})
-        st.dataframe(
-            os_only,
-            use_container_width=True,
-            hide_index=True,
-            height=240
-        )
+        st.dataframe(os_only, use_container_width=True, hide_index=True, height=240)
     else:
         st.info("No hay próximos vencimientos sin transportista.")
 
@@ -308,23 +305,13 @@ def icono_estado(est):
     if est == "POR VENCER": return "🟡"
     return "⚪"
 
-tabla = df_sorted[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
-tabla = tabla.rename(columns={
-    COL_OS_DB: "O/S",
-    "fecha_programacion_display": "Fecha Programación de servicio",
-})
-tabla["Riesgo"] = tabla["EstadoTiempo"].apply(icono_estado)
-tabla = tabla[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
-
 # ---------------- ROTACIÓN ----------------
-ROTATION_WINDOW = 15
 try:
     phase = (refresh_counter // ROTATION_WINDOW) % 2
 except NameError:
     phase = 0
 
 if phase == 0:
-    # ✅ SOLO VENCIDOS SIN TRANSPORTISTA
     df_v = df_sorted[(df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista].copy()
 
     tabla_view = df_v[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
@@ -378,6 +365,3 @@ def style_row(row):
 
 styled_df = tabla_view.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
-
-
-
