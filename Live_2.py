@@ -4,7 +4,6 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from streamlit_autorefresh import st_autorefresh
 from supabase import create_client, Client
-import altair as alt
 
 # ---------------- SUPABASE ----------------
 SUPABASE_URL = st.secrets["supabase"]["url"]
@@ -19,10 +18,13 @@ COL_UPDATED_DB = "updated_at"
 COL_ESTADO_ACT_DB = "estado_actividad"
 COL_TRANSP_DB = "transportista"
 
+TZ = ZoneInfo("America/Santiago")
+
 # ---------------- STREAMLIT ----------------
 st.set_page_config(page_title="Vencimientos de Casos", page_icon="favicon.png", layout="wide")
 
-st.markdown("""
+st.markdown(
+    """
 <style>
 /* CONTENEDOR */
 .block-container { padding-top: 0.6rem !important; padding-bottom: 0.8rem !important; }
@@ -44,7 +46,7 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 20px;
     font-weight: 600;
     opacity: 0.9;
-    text-transform: none !important;   /* SIN MAYÚSCULAS */
+    text-transform: none !important;
 }
 
 .kpi-value {
@@ -59,11 +61,16 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     margin-top: 6px;
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # AUTOREFRESH
 REFRESH_MS = 1000
 refresh_counter = st_autorefresh(interval=REFRESH_MS, key="refresh")
+
+# ROTACIÓN (segundos)
+ROTATION_WINDOW = 15
 
 # TITULO PRINCIPAL
 st.title("Vencimientos Servicios de HOY")
@@ -80,7 +87,7 @@ def load_data_from_supabase() -> pd.DataFrame:
 df = load_data_from_supabase()
 
 # ---------------- RELOJ + ÚLTIMA LECTURA ----------------
-now_ui = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
+now_ui = datetime.now(TZ).replace(tzinfo=None)
 
 last_updated = None
 if not df.empty and COL_UPDATED_DB in df.columns:
@@ -91,19 +98,25 @@ if not df.empty and COL_UPDATED_DB in df.columns:
 c_time1, c_time2 = st.columns([1, 1])
 
 with c_time1:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="text-align:left;">
         🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 with c_time2:
-    ultima_txt = last_updated.strftime('%Y-%m-%d %H:%M:%S') if last_updated else "—"
-    st.markdown(f"""
+    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
+    st.markdown(
+        f"""
     <div style="text-align:right;">
         🗄️ Última actualización: <b>{ultima_txt}</b>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
 
@@ -119,7 +132,6 @@ if df.empty:
 
 # ---------------- FECHAS ----------------
 dt = pd.to_datetime(df[COL_FECHA_DB], errors="coerce")
-
 try:
     if getattr(dt.dt, "tz", None) is not None:
         dt = dt.dt.tz_convert("UTC").dt.tz_localize(None)
@@ -129,7 +141,7 @@ except Exception:
 df[COL_FECHA_DB] = dt
 df["fecha_programacion_display"] = df[COL_FECHA_DB].dt.strftime("%Y-%m-%d %H:%M:%S").astype(str)
 
-now = datetime.now(ZoneInfo("America/Santiago")).replace(tzinfo=None)
+now = datetime.now(TZ).replace(tzinfo=None)
 
 def human_diff(target_dt: datetime):
     diff_seconds = int((now - target_dt).total_seconds())
@@ -171,12 +183,16 @@ df["DetalleTiempo"] = detalles
 transp = df.get(COL_TRANSP_DB, pd.Series([None] * len(df))).astype("string")
 sin_transportista = transp.isna() | (transp.str.strip() == "") | (transp.str.lower().str.strip() == "nan")
 
-# ---------------- EFECTIVIDAD ----------------
+# ---------------- EFECTIVIDAD (según tus condiciones) ----------------
+# Total casos = total filas de supabase
+# Casos efectivos = Estado Actividad en (PROG, DESP, ENRU, FINA) Y transportista asignado
 total_casos = int(len(df))
 estado_act = df.get(COL_ESTADO_ACT_DB, pd.Series([None] * len(df))).astype("string")
 
 transportista_asignado = ~sin_transportista
-casos_efectivos = int(((estado_act == "PROG") & transportista_asignado).sum())
+estados_efectivos = ["PROG", "DESP", "ENRU", "FINA"]
+
+casos_efectivos = int(((estado_act.isin(estados_efectivos)) & transportista_asignado).sum())
 efectividad = (casos_efectivos / total_casos * 100.0) if total_casos > 0 else 0.0
 
 # ---------------- COLOR EFECTIVIDAD (rangos, SOLO COLOR) ----------------
@@ -199,7 +215,7 @@ def efectividad_style(pct: float):
 ef = efectividad_style(efectividad)
 
 # ---------------- KPIs ----------------
-# ✅ Solo casos SIN transportista
+# ✅ KPIs de vencimiento = SOLO casos SIN transportista
 vencidos = int(((df["EstadoTiempo"] == "VENCIDO") & sin_transportista).sum())
 urgentes = int(((df["EstadoTiempo"] == "URGENTE") & sin_transportista).sum())
 por_vencer = int(((df["EstadoTiempo"] == "POR VENCER") & sin_transportista).sum())
@@ -207,31 +223,41 @@ por_vencer = int(((df["EstadoTiempo"] == "POR VENCER") & sin_transportista).sum(
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
         <div class="kpi-title">Vencidos</div>
         <div class="kpi-value" style="color:red;">{vencidos}</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 with c2:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
         <div class="kpi-title">Urgentes (&lt;30m)</div>
         <div class="kpi-value" style="color:orange;">{urgentes}</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 with c3:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
         <div class="kpi-title">Por vencer</div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 with c4:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
         <div class="kpi-title">Efectividad</div>
         <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
@@ -239,16 +265,16 @@ with c4:
             Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-
-# ---------------- PRÓXIMO VENCIMIENTO (SOLO SIN TRANSPORTISTA) ----------------
+# ---------------- PRÓXIMO VENCIMIENTO (solo SIN transportista) ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
 df_valid = df_valid[sin_transportista].copy()
 
-next_dt = None
 next_count = 0
 next_os_list = []
 
@@ -260,61 +286,53 @@ if not df_valid.empty:
         next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
         next_count = len(next_os_list)
 
-# ---------------- EXPANDER ----------------
+# (Se mantiene el expander siempre, para que no “desaparezca”)
 with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
     if next_count > 0:
-        os_only = pd.DataFrame({"O/S": next_os_list})
-        st.dataframe(os_only, use_container_width=True, hide_index=True, height=240)
+        st.dataframe(pd.DataFrame({"O/S": next_os_list}), use_container_width=True, hide_index=True, height=240)
     else:
         st.info("No hay próximos vencimientos sin transportista.")
 
-# ---------------- TABLA BASE (para urgentes/por vencer) ----------------
+# ---------------- TABLA + ROTACIÓN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
 df["_ord"] = df["EstadoTiempo"].map(order_map).fillna(99)
 df_sorted = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"]).copy()
 
-blink_on = (datetime.now(ZoneInfo("America/Santiago")).second % 2 == 0)
+blink_on = (datetime.now(TZ).second % 2 == 0)
 
 def icono_estado(est):
-    if est == "VENCIDO": return "🔴"
-    if est == "URGENTE": return "🟠"
-    if est == "POR VENCER": return "🟡"
+    if est == "VENCIDO":
+        return "🔴"
+    if est == "URGENTE":
+        return "🟠"
+    if est == "POR VENCER":
+        return "🟡"
     return "⚪"
 
-# ---------------- ROTACIÓN ----------------
-try:
-    phase = (refresh_counter // ROTATION_WINDOW) % 2
-except NameError:
-    phase = 0
+# Rotación
+phase = (refresh_counter // ROTATION_WINDOW) % 2
 
 if phase == 0:
     df_v = df_sorted[(df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista].copy()
-
-    tabla_view = df_v[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
-    tabla_view = tabla_view.rename(columns={
-        COL_OS_DB: "O/S",
-        "fecha_programacion_display": "Fecha Programación de servicio",
-    })
-    tabla_view["Riesgo"] = tabla_view["EstadoTiempo"].apply(icono_estado)
-    tabla_view = tabla_view[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
-
     view_title = "Servicios Vencidos"
+    tabla_view = df_v
 else:
     df_u = df_sorted[df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"]) & sin_transportista].copy()
-
-    tabla_view = df_u[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
-    tabla_view = tabla_view.rename(columns={
-        COL_OS_DB: "O/S",
-        "fecha_programacion_display": "Fecha Programación de servicio",
-    })
-    tabla_view["Riesgo"] = tabla_view["EstadoTiempo"].apply(icono_estado)
-    tabla_view = tabla_view[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
-
     view_title = "Servicios Urgentes y Por Vencer"
+    tabla_view = df_u
 
 st.subheader(view_title)
 
-# ---------------- STYLE TABLA ----------------
+tabla = tabla_view[[COL_OS_DB, "fecha_programacion_display", "EstadoTiempo", "DetalleTiempo"]].copy()
+tabla = tabla.rename(
+    columns={
+        COL_OS_DB: "O/S",
+        "fecha_programacion_display": "Fecha Programación de servicio",
+    }
+)
+tabla["Riesgo"] = tabla["EstadoTiempo"].apply(icono_estado)
+tabla = tabla[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
+
 def style_row(row):
     styles = [""] * len(row)
     idx_riesgo = row.index.get_loc("Riesgo")
@@ -339,6 +357,5 @@ def style_row(row):
 
     return styles
 
-styled_df = tabla_view.style.apply(style_row, axis=1)
+styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
-
