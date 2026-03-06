@@ -297,6 +297,39 @@ with c4:
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
+# ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
+
+st.markdown(
+    f"""
+<div style="margin-top:10px; margin-bottom:18px;">
+
+<div style="font-size:15px; font-weight:600; margin-bottom:6px;">
+Avance de efectividad
+</div>
+
+<div style="
+    width:100%;
+    height:14px;
+    background:rgba(255,255,255,0.08);
+    border-radius:999px;
+    overflow:hidden;
+">
+
+<div style="
+    width:{ef_pct}%;
+    height:100%;
+    background:{ef['text']};
+    border-radius:999px;
+    transition:width 0.6s ease;
+"></div>
+
+</div>
+
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
 # ---------------- PRÓXIMO VENCIMIENTO (solo SIN transportista) ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
 df_valid = df_valid[sin_transportista].copy()
@@ -384,4 +417,5 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+
 
