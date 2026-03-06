@@ -129,21 +129,23 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 }
 
 .premium-table thead th {
+    transform: translateZ(0);
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 5;
     text-align: left;
     padding: 14px 14px;
     font-size: 14px;
     font-weight: 700;
-    color: rgba(255,255,255,0.88);
+    color: rgba(255,255,255,0.90);
+
     background: linear-gradient(
         180deg,
-        rgba(255,255,255,0.07) 0%,
-        rgba(255,255,255,0.03) 100%
+        rgba(28,32,40,0.98) 0%,
+        rgba(18,21,27,0.98) 100%
     );
+
     border-bottom: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(6px);
 }
 
 .premium-table tbody td {
@@ -632,3 +634,4 @@ def render_premium_table(df_table: pd.DataFrame, height_px: int = 720) -> str:
 
 tabla_html = render_premium_table(tabla, height_px=720)
 st.markdown(tabla_html, unsafe_allow_html=True)
+
