@@ -90,6 +90,43 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     animation: shine 2.6s linear infinite;
     pointer-events: none;
 }
+
+/* TABLA */
+[data-testid="stDataFrame"] table {
+    border-collapse: collapse !important;
+}
+
+/* HEADER */
+[data-testid="stDataFrame"] thead tr th {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.06) 0%,
+        rgba(255,255,255,0.02) 100%
+    ) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: rgba(255,255,255,0.85) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+/* FILAS */
+[data-testid="stDataFrame"] tbody tr td {
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+    font-size: 14px !important;
+}
+
+/* HOVER */
+[data-testid="stDataFrame"] tbody tr:hover {
+    background-color: rgba(255,255,255,0.03) !important;
+}
+
+/* CELDAS */
+[data-testid="stDataFrame"] td {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -458,6 +495,3 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
-
-
-
