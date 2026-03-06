@@ -4,6 +4,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from streamlit_autorefresh import st_autorefresh
 from supabase import create_client, Client
+from html import escape
 
 # ---------------- SUPABASE ----------------
 SUPABASE_URL = st.secrets["supabase"]["url"]
@@ -91,41 +92,136 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     pointer-events: none;
 }
 
-/* TABLA */
-[data-testid="stDataFrame"] table {
-    border-collapse: collapse !important;
+/* TABLA PREMIUM */
+.table-shell {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.015);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
 
-/* HEADER */
-[data-testid="stDataFrame"] thead tr th {
+.table-scroll {
+    max-height: 720px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.table-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.04);
+    border-radius: 999px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.14);
+    border-radius: 999px;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.premium-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    text-align: left;
+    padding: 14px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.88);
     background: linear-gradient(
         180deg,
-        rgba(255,255,255,0.06) 0%,
-        rgba(255,255,255,0.02) 100%
-    ) !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: rgba(255,255,255,0.85) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
+        rgba(255,255,255,0.07) 0%,
+        rgba(255,255,255,0.03) 100%
+    );
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(6px);
 }
 
-/* FILAS */
-[data-testid="stDataFrame"] tbody tr td {
-    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
-    font-size: 14px !important;
+.premium-table tbody td {
+    padding: 13px 14px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: middle;
+    word-wrap: break-word;
 }
 
-/* HOVER */
-[data-testid="stDataFrame"] tbody tr:hover {
-    background-color: rgba(255,255,255,0.03) !important;
+.premium-table tbody tr:hover {
+    background: rgba(255,255,255,0.03);
 }
 
-/* CELDAS */
-[data-testid="stDataFrame"] td {
-    padding-top: 8px !important;
-    padding-bottom: 8px !important;
+.premium-table th:nth-child(1),
+.premium-table td:nth-child(1) {
+    width: 90px;
+}
+
+.premium-table th:nth-child(2),
+.premium-table td:nth-child(2) {
+    width: 90px;
+}
+
+.premium-table th:nth-child(3),
+.premium-table td:nth-child(3) {
+    width: 230px;
+}
+
+.premium-table th:nth-child(4),
+.premium-table td:nth-child(4) {
+    width: 140px;
+}
+
+.premium-table th:nth-child(5),
+.premium-table td:nth-child(5) {
+    width: 180px;
+}
+
+.risk-dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 2px rgba(255,255,255,0.04) inset,
+        0 0 10px currentColor;
+}
+
+.state-vencido {
+    color: #ff3b30;
+    font-weight: 900;
+}
+
+.state-urgente {
+    color: #ff9f0a;
+    font-weight: 900;
+}
+
+.state-urgente-dim {
+    color: rgba(255,165,0,0.28);
+    font-weight: 900;
+}
+
+.state-porvencer {
+    color: #FFF176;
+    font-weight: 900;
+}
+
+.detail-urgente {
+    color: #ffb020;
+    font-weight: 800;
+}
+
+.detail-urgente-dim {
+    color: rgba(255,165,0,0.28);
+    font-weight: 800;
 }
 </style>
 """,
@@ -469,29 +565,67 @@ tabla = tabla.rename(
 tabla["Riesgo"] = tabla["EstadoTiempo"].apply(icono_estado)
 tabla = tabla[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
 
-def style_row(row):
-    styles = [""] * len(row)
-    idx_riesgo = row.index.get_loc("Riesgo")
-    idx_estado = row.index.get_loc("EstadoTiempo")
-    idx_detalle = row.index.get_loc("DetalleTiempo")
-
-    if row["EstadoTiempo"] == "VENCIDO":
-        styles[idx_estado] = "color:red; font-weight:900;"
-        styles[idx_riesgo] = "font-size:20px;"
-    elif row["EstadoTiempo"] == "URGENTE":
+def get_risk_dot_and_classes(estado: str):
+    if estado == "VENCIDO":
+        return "#ff3b30", "state-vencido", ""
+    if estado == "URGENTE":
         if blink_on:
-            styles[idx_estado] = "color:orange; font-weight:900;"
-            styles[idx_detalle] = "color:orange; font-weight:800;"
-            styles[idx_riesgo] = "font-size:20px;"
-        else:
-            styles[idx_estado] = "color:rgba(255,165,0,0.25); font-weight:900;"
-            styles[idx_detalle] = "color:rgba(255,165,0,0.25); font-weight:800;"
-            styles[idx_riesgo] = "font-size:20px; opacity:0.25;"
-    elif row["EstadoTiempo"] == "POR VENCER":
-        styles[idx_estado] = "color:#FFF176; font-weight:900;"
-        styles[idx_riesgo] = "font-size:20px;"
+            return "#ff9f0a", "state-urgente", "detail-urgente"
+        return "#a86a1b", "state-urgente-dim", "detail-urgente-dim"
+    if estado == "POR VENCER":
+        return "#FFF176", "state-porvencer", ""
+    return "rgba(255,255,255,0.35)", "", ""
 
-    return styles
+def render_premium_table(df_table: pd.DataFrame, height_px: int = 720) -> str:
+    headers = ["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]
 
-styled_df = tabla.style.apply(style_row, axis=1)
-st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+    html_rows = []
+    for _, row in df_table.iterrows():
+        riesgo_color, estado_class, detalle_class = get_risk_dot_and_classes(str(row["EstadoTiempo"]))
+
+        riesgo_html = f'<span class="risk-dot" style="background:{riesgo_color}; color:{riesgo_color};"></span>'
+        os_html = escape(str(row["O/S"]))
+        fecha_html = escape(str(row["Fecha Programación de servicio"]))
+        estado_html = f'<span class="{estado_class}">{escape(str(row["EstadoTiempo"]))}</span>' if estado_class else escape(str(row["EstadoTiempo"]))
+        detalle_val = escape(str(row["DetalleTiempo"]))
+        detalle_html = f'<span class="{detalle_class}">{detalle_val}</span>' if detalle_class else detalle_val
+
+        html_rows.append(f"""
+<tr>
+    <td>{riesgo_html}</td>
+    <td>{os_html}</td>
+    <td>{fecha_html}</td>
+    <td>{estado_html}</td>
+    <td>{detalle_html}</td>
+</tr>
+""")
+
+    if not html_rows:
+        html_rows.append("""
+<tr>
+    <td colspan="5" style="text-align:center; color:rgba(255,255,255,0.65); padding:22px;">
+        No hay registros para mostrar.
+    </td>
+</tr>
+""")
+
+    header_html = "".join([f"<th>{escape(h)}</th>" for h in headers])
+    rows_html = "".join(html_rows)
+
+    return f"""
+<div class="table-shell">
+    <div class="table-scroll" style="max-height:{height_px}px;">
+        <table class="premium-table">
+            <thead>
+                <tr>{header_html}</tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+    </div>
+</div>
+"""
+
+tabla_html = render_premium_table(tabla, height_px=720)
+st.markdown(tabla_html, unsafe_allow_html=True)
