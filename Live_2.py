@@ -299,34 +299,59 @@ st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 # ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
 st.markdown(
     f"""
-<div style="margin-top:10px; margin-bottom:18px;">
-
-    <div style="font-size:15px; font-weight:600; margin-bottom:6px;">
-        Efectividad global
-    </div>
-
-    <div style="
-        width:100%;
-        height:16px;
-        background:linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.10) 100%);
-        border-radius:999px;
-        overflow:hidden;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
-    ">
+    <div style="margin-top:10px; margin-bottom:18px;">
 
         <div style="
-            width:{ef_pct}%;
-            height:100%;
-            background:{ef['bar']};
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:6px;
+            font-size:15px;
+            font-weight:600;
+        ">
+            <span>Efectividad global</span>
+            <span style="color:{ef['text']}; font-weight:800;">{efectividad:.1f}%</span>
+        </div>
+
+        <div style="
+            width:100%;
+            height:16px;
+            background:linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 100%);
             border-radius:999px;
-            transition:width 0.9s ease-in-out;
-            box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
-        "></div>
+            overflow:hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+            border:1px solid rgba(255,255,255,0.06);
+        ">
+
+            <div style="
+                width:{ef_pct}%;
+                height:100%;
+                background:{ef['bar']};
+                border-radius:999px;
+                transition:width 0.9s ease-in-out;
+                box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
+                position:relative;
+            ">
+                <div style="
+                    position:absolute;
+                    top:0;
+                    left:0;
+                    width:100%;
+                    height:100%;
+                    background:linear-gradient(
+                        90deg,
+                        rgba(255,255,255,0.00) 0%,
+                        rgba(255,255,255,0.18) 45%,
+                        rgba(255,255,255,0.00) 100%
+                    );
+                    opacity:0.7;
+                "></div>
+            </div>
+
+        </div>
 
     </div>
-
-</div>
-""",
+    """,
     unsafe_allow_html=True,
 )
 
