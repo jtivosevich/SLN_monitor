@@ -40,12 +40,14 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     display: flex;
     flex-direction: column;
     justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    backdrop-filter: blur(4px);
 }
 
 .kpi-title {
     font-size: 20px;
     font-weight: 600;
-    opacity: 0.9;
+    opacity: 0.92;
     text-transform: none !important;
 }
 
@@ -57,33 +59,8 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 .kpi-sub {
     font-size: 14px;
-    opacity: 0.8;
+    opacity: 0.82;
     margin-top: 6px;
-}
-
-/* Barra de progreso visual */
-.progress-wrap {
-    margin-top: 8px;
-    margin-bottom: 2px;
-}
-
-.progress-label {
-    font-size: 13px;
-    opacity: 0.85;
-    margin-bottom: 4px;
-}
-
-.progress-bar-bg {
-    width: 100%;
-    height: 10px;
-    background: rgba(255,255,255,0.10);
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    border-radius: 999px;
 }
 </style>
 """,
@@ -208,9 +185,7 @@ df["DetalleTiempo"] = detalles
 transp = df.get(COL_TRANSP_DB, pd.Series([None] * len(df))).astype("string")
 sin_transportista = transp.isna() | (transp.str.strip() == "") | (transp.str.lower().str.strip() == "nan")
 
-# ---------------- EFECTIVIDAD (según tus condiciones) ----------------
-# Total casos = total filas de supabase
-# Casos efectivos = Estado Actividad en (PROG, DESP, ENRU, FINA) Y transportista asignado
+# ---------------- EFECTIVIDAD ----------------
 total_casos = int(len(df))
 estado_act = df.get(COL_ESTADO_ACT_DB, pd.Series([None] * len(df))).astype("string")
 
@@ -220,7 +195,7 @@ estados_efectivos = ["PROG", "DESP", "ENRU", "FINA"]
 casos_efectivos = int(((estado_act.isin(estados_efectivos)) & transportista_asignado).sum())
 efectividad = (casos_efectivos / total_casos * 100.0) if total_casos > 0 else 0.0
 
-# ---------------- COLOR EFECTIVIDAD (rangos, SOLO COLOR) ----------------
+# ---------------- ESTILO EFECTIVIDAD ----------------
 def efectividad_style(pct: float):
     try:
         pct = float(pct)
@@ -229,19 +204,43 @@ def efectividad_style(pct: float):
     pct = max(0.0, min(100.0, pct))
 
     if pct <= 25:
-        return {"bg": "rgba(255,0,0,0.12)", "border": "red", "text": "red"}
+        return {
+            "bg": "linear-gradient(135deg, rgba(255,0,0,0.22) 0%, rgba(120,0,0,0.12) 100%)",
+            "border": "#ff3b30",
+            "text": "#ff3b30",
+            "bar": "linear-gradient(90deg, #ff5f57 0%, #ff3b30 100%)",
+        }
     elif pct <= 50:
-        return {"bg": "rgba(255,165,0,0.18)", "border": "orange", "text": "orange"}
+        return {
+            "bg": "linear-gradient(135deg, rgba(255,165,0,0.22) 0%, rgba(120,70,0,0.12) 100%)",
+            "border": "#ff9f0a",
+            "text": "#ff9f0a",
+            "bar": "linear-gradient(90deg, #ffbe55 0%, #ff9f0a 100%)",
+        }
     elif pct <= 75:
-        return {"bg": "rgba(255,241,118,0.20)", "border": "#FFF176", "text": "#FFF176"}
+        return {
+            "bg": "linear-gradient(135deg, rgba(255,241,118,0.22) 0%, rgba(140,130,40,0.12) 100%)",
+            "border": "#FFF176",
+            "text": "#FFF176",
+            "bar": "linear-gradient(90deg, #fff59d 0%, #FFF176 100%)",
+        }
     else:
-        return {"bg": "rgba(0,200,83,0.14)", "border": "#00C853", "text": "#00C853"}
+        return {
+            "bg": "linear-gradient(135deg, rgba(0,200,83,0.22) 0%, rgba(0,90,50,0.12) 100%)",
+            "border": "#00C853",
+            "text": "#00E676",
+            "bar": "linear-gradient(90deg, #00e676 0%, #00c853 100%)",
+        }
 
 ef = efectividad_style(efectividad)
 ef_pct = max(0.0, min(100.0, efectividad))
 
+# ---------------- ESTILOS KPI POR CATEGORÍA ----------------
+kpi_vencidos_bg = "linear-gradient(135deg, rgba(255,0,0,0.22) 0%, rgba(90,0,0,0.14) 100%)"
+kpi_urgentes_bg = "linear-gradient(135deg, rgba(255,165,0,0.22) 0%, rgba(110,70,0,0.14) 100%)"
+kpi_porvencer_bg = "linear-gradient(135deg, rgba(255,241,118,0.22) 0%, rgba(110,110,45,0.14) 100%)"
+
 # ---------------- KPIs ----------------
-# ✅ KPIs de vencimiento = SOLO casos SIN transportista
 vencidos = int(((df["EstadoTiempo"] == "VENCIDO") & sin_transportista).sum())
 urgentes = int(((df["EstadoTiempo"] == "URGENTE") & sin_transportista).sum())
 por_vencer = int(((df["EstadoTiempo"] == "POR VENCER") & sin_transportista).sum())
@@ -251,9 +250,9 @@ c1, c2, c3, c4 = st.columns(4)
 with c1:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:rgba(255,0,0,0.12); border-left:8px solid red;">
+    <div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
         <div class="kpi-title">Vencidos</div>
-        <div class="kpi-value" style="color:red;">{vencidos}</div>
+        <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -262,9 +261,9 @@ with c1:
 with c2:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:rgba(255,165,0,0.18); border-left:8px solid orange;">
+    <div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
         <div class="kpi-title">Urgentes (&lt;30m)</div>
-        <div class="kpi-value" style="color:orange;">{urgentes}</div>
+        <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -273,7 +272,7 @@ with c2:
 with c3:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:rgba(255,241,118,0.20); border-left:8px solid #FFF176;">
+    <div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
         <div class="kpi-title">Por vencer</div>
         <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
     </div>
@@ -298,39 +297,40 @@ with c4:
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 # ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
-
 st.markdown(
     f"""
 <div style="margin-top:10px; margin-bottom:18px;">
 
-<div style="font-size:15px; font-weight:600; margin-bottom:6px;">
-Efectividad
-</div>
+    <div style="font-size:15px; font-weight:600; margin-bottom:6px;">
+        Efectividad global
+    </div>
 
-<div style="
-    width:100%;
-    height:14px;
-    background:rgba(255,255,255,0.08);
-    border-radius:999px;
-    overflow:hidden;
-">
+    <div style="
+        width:100%;
+        height:16px;
+        background:linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.10) 100%);
+        border-radius:999px;
+        overflow:hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+    ">
 
-<div style="
-    width:{ef_pct}%;
-    height:100%;
-    background:{ef['text']};
-    border-radius:999px;
-    transition:width 0.6s ease;
-"></div>
+        <div style="
+            width:{ef_pct}%;
+            height:100%;
+            background:{ef['bar']};
+            border-radius:999px;
+            transition:width 0.9s ease-in-out;
+            box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
+        "></div>
 
-</div>
+    </div>
 
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# ---------------- PRÓXIMO VENCIMIENTO (solo SIN transportista) ----------------
+# ---------------- PRÓXIMO VENCIMIENTO ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
 df_valid = df_valid[sin_transportista].copy()
 
@@ -347,7 +347,12 @@ if not df_valid.empty:
 
 with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
     if next_count > 0:
-        st.dataframe(pd.DataFrame({"O/S": next_os_list}), use_container_width=True, hide_index=True, height=240)
+        st.dataframe(
+            pd.DataFrame({"O/S": next_os_list}),
+            use_container_width=True,
+            hide_index=True,
+            height=240
+        )
     else:
         st.info("No hay próximos vencimientos sin transportista.")
 
@@ -367,7 +372,6 @@ def icono_estado(est):
         return "🟡"
     return "⚪"
 
-# Rotación
 phase = (refresh_counter // ROTATION_WINDOW) % 2
 
 if phase == 0:
@@ -417,6 +421,3 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
-
-
-
