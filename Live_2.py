@@ -304,7 +304,7 @@ st.markdown(
 <div style="margin-top:10px; margin-bottom:18px;">
 
 <div style="font-size:15px; font-weight:600; margin-bottom:6px;">
-Avance de efectividad
+Efectividad
 </div>
 
 <div style="
@@ -417,5 +417,6 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+
 
 
