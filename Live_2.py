@@ -171,17 +171,17 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 .premium-table th:nth-child(3),
 .premium-table td:nth-child(3) {
-    width: 230px;
+    width: 260px;
 }
 
 .premium-table th:nth-child(4),
 .premium-table td:nth-child(4) {
-    width: 140px;
+    width: 150px;
 }
 
 .premium-table th:nth-child(5),
 .premium-table td:nth-child(5) {
-    width: 180px;
+    width: 220px;
 }
 
 .risk-dot {
@@ -533,15 +533,6 @@ df_sorted = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"]).cop
 
 blink_on = (datetime.now(TZ).second % 2 == 0)
 
-def icono_estado(est):
-    if est == "VENCIDO":
-        return "🔴"
-    if est == "URGENTE":
-        return "🟠"
-    if est == "POR VENCER":
-        return "🟡"
-    return "⚪"
-
 phase = (refresh_counter // ROTATION_WINDOW) % 2
 
 if phase == 0:
@@ -562,8 +553,7 @@ tabla = tabla.rename(
         "fecha_programacion_display": "Fecha Programación de servicio",
     }
 )
-tabla["Riesgo"] = tabla["EstadoTiempo"].apply(icono_estado)
-tabla = tabla[["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
+tabla = tabla[["O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]]
 
 def get_risk_dot_and_classes(estado: str):
     if estado == "VENCIDO":
@@ -577,55 +567,68 @@ def get_risk_dot_and_classes(estado: str):
     return "rgba(255,255,255,0.35)", "", ""
 
 def render_premium_table(df_table: pd.DataFrame, height_px: int = 720) -> str:
-    headers = ["Riesgo", "O/S", "Fecha Programación de servicio", "EstadoTiempo", "DetalleTiempo"]
+    headers = [
+        "Riesgo",
+        "O/S",
+        "Fecha Programación de servicio",
+        "EstadoTiempo",
+        "DetalleTiempo",
+    ]
 
-    html_rows = []
-    for _, row in df_table.iterrows():
-        riesgo_color, estado_class, detalle_class = get_risk_dot_and_classes(str(row["EstadoTiempo"]))
+    rows = []
 
-        riesgo_html = f'<span class="risk-dot" style="background:{riesgo_color}; color:{riesgo_color};"></span>'
-        os_html = escape(str(row["O/S"]))
-        fecha_html = escape(str(row["Fecha Programación de servicio"]))
-        estado_html = f'<span class="{estado_class}">{escape(str(row["EstadoTiempo"]))}</span>' if estado_class else escape(str(row["EstadoTiempo"]))
-        detalle_val = escape(str(row["DetalleTiempo"]))
-        detalle_html = f'<span class="{detalle_class}">{detalle_val}</span>' if detalle_class else detalle_val
-
-        html_rows.append(f"""
-<tr>
-    <td>{riesgo_html}</td>
-    <td>{os_html}</td>
-    <td>{fecha_html}</td>
-    <td>{estado_html}</td>
-    <td>{detalle_html}</td>
-</tr>
-""")
-
-    if not html_rows:
-        html_rows.append("""
+    if df_table.empty:
+        rows.append(
+            """
 <tr>
     <td colspan="5" style="text-align:center; color:rgba(255,255,255,0.65); padding:22px;">
         No hay registros para mostrar.
     </td>
 </tr>
-""")
-
-    header_html = "".join([f"<th>{escape(h)}</th>" for h in headers])
-    rows_html = "".join(html_rows)
-
-    return f"""
-<div class="table-shell">
-    <div class="table-scroll" style="max-height:{height_px}px;">
-        <table class="premium-table">
-            <thead>
-                <tr>{header_html}</tr>
-            </thead>
-            <tbody>
-                {rows_html}
-            </tbody>
-        </table>
-    </div>
-</div>
 """
+        )
+    else:
+        for _, row in df_table.iterrows():
+            estado = str(row["EstadoTiempo"])
+            riesgo_color, estado_class, detalle_class = get_risk_dot_and_classes(estado)
+
+            riesgo_html = f'<span class="risk-dot" style="background:{riesgo_color}; color:{riesgo_color};"></span>'
+            os_html = escape(str(row["O/S"]))
+            fecha_html = escape(str(row["Fecha Programación de servicio"]))
+            estado_html = (
+                f'<span class="{estado_class}">{escape(estado)}</span>'
+                if estado_class else escape(estado)
+            )
+            detalle_raw = escape(str(row["DetalleTiempo"]))
+            detalle_html = (
+                f'<span class="{detalle_class}">{detalle_raw}</span>'
+                if detalle_class else detalle_raw
+            )
+
+            row_html = (
+                "<tr>"
+                f"<td>{riesgo_html}</td>"
+                f"<td>{os_html}</td>"
+                f"<td>{fecha_html}</td>"
+                f"<td>{estado_html}</td>"
+                f"<td>{detalle_html}</td>"
+                "</tr>"
+            )
+            rows.append(row_html)
+
+    header_html = "".join(f"<th>{escape(h)}</th>" for h in headers)
+    body_html = "".join(rows)
+
+    return (
+        f'<div class="table-shell">'
+        f'  <div class="table-scroll" style="max-height:{height_px}px;">'
+        f'    <table class="premium-table">'
+        f'      <thead><tr>{header_html}</tr></thead>'
+        f'      <tbody>{body_html}</tbody>'
+        f'    </table>'
+        f'  </div>'
+        f'</div>'
+    )
 
 tabla_html = render_premium_table(tabla, height_px=720)
 st.markdown(tabla_html, unsafe_allow_html=True)
