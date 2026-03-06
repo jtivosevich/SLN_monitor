@@ -102,10 +102,10 @@ c_time1, c_time2 = st.columns([1, 1])
 with c_time1:
     st.markdown(
         f"""
-    <div style="text-align:left;">
-        🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
-    </div>
-    """,
+<div style="text-align:left;">
+    🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
+</div>
+""",
         unsafe_allow_html=True,
     )
 
@@ -113,10 +113,10 @@ with c_time2:
     ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
     st.markdown(
         f"""
-    <div style="text-align:right;">
-        🗄️ Última actualización: <b>{ultima_txt}</b>
-    </div>
-    """,
+<div style="text-align:right;">
+    🗄️ Última actualización: <b>{ultima_txt}</b>
+</div>
+""",
         unsafe_allow_html=True,
     )
 
@@ -250,47 +250,47 @@ c1, c2, c3, c4 = st.columns(4)
 with c1:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
-        <div class="kpi-title">Vencidos</div>
-        <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
-    </div>
-    """,
+<div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
+    <div class="kpi-title">Vencidos</div>
+    <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
+</div>
+""",
         unsafe_allow_html=True,
     )
 
 with c2:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
-        <div class="kpi-title">Urgentes (&lt;30m)</div>
-        <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
-    </div>
-    """,
+<div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
+    <div class="kpi-title">Urgentes (&lt;30m)</div>
+    <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
+</div>
+""",
         unsafe_allow_html=True,
     )
 
 with c3:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
-        <div class="kpi-title">Por vencer</div>
-        <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
-    </div>
-    """,
+<div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
+    <div class="kpi-title">Por vencer</div>
+    <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
+</div>
+""",
         unsafe_allow_html=True,
     )
 
 with c4:
     st.markdown(
         f"""
-    <div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
-        <div class="kpi-title">Efectividad</div>
-        <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
-        <div class="kpi-sub">
-            Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
-        </div>
+<div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
+    <div class="kpi-title">Efectividad</div>
+    <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
+    <div class="kpi-sub">
+        Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
     </div>
-    """,
+</div>
+""",
         unsafe_allow_html=True,
     )
 
@@ -299,59 +299,55 @@ st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 # ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
 st.markdown(
     f"""
-    <div style="margin-top:10px; margin-bottom:18px;">
-
-        <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:6px;
-            font-size:15px;
-            font-weight:600;
-        ">
-            <span>Efectividad global</span>
-            <span style="color:{ef['text']}; font-weight:800;">{efectividad:.1f}%</span>
-        </div>
-
-        <div style="
-            width:100%;
-            height:16px;
-            background:linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 100%);
-            border-radius:999px;
-            overflow:hidden;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
-            border:1px solid rgba(255,255,255,0.06);
-        ">
-
-            <div style="
-                width:{ef_pct}%;
-                height:100%;
-                background:{ef['bar']};
-                border-radius:999px;
-                transition:width 0.9s ease-in-out;
-                box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
-                position:relative;
-            ">
-                <div style="
-                    position:absolute;
-                    top:0;
-                    left:0;
-                    width:100%;
-                    height:100%;
-                    background:linear-gradient(
-                        90deg,
-                        rgba(255,255,255,0.00) 0%,
-                        rgba(255,255,255,0.18) 45%,
-                        rgba(255,255,255,0.00) 100%
-                    );
-                    opacity:0.7;
-                "></div>
-            </div>
-
-        </div>
-
+<div style="margin-top:10px; margin-bottom:18px;">
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:6px;
+        font-size:15px;
+        font-weight:600;
+    ">
+        <span>Efectividad global</span>
+        <span style="color:{ef['text']}; font-weight:800;">{efectividad:.1f}%</span>
     </div>
-    """,
+
+    <div style="
+        width:100%;
+        height:16px;
+        background:linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.10) 100%);
+        border-radius:999px;
+        overflow:hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+        border:1px solid rgba(255,255,255,0.06);
+    ">
+        <div style="
+            width:{ef_pct}%;
+            height:100%;
+            background:{ef['bar']};
+            border-radius:999px;
+            transition:width 0.9s ease-in-out;
+            box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
+            position:relative;
+        ">
+            <div style="
+                position:absolute;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                background:linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.00) 0%,
+                    rgba(255,255,255,0.18) 45%,
+                    rgba(255,255,255,0.00) 100%
+                );
+                opacity:0.7;
+            "></div>
+        </div>
+    </div>
+</div>
+""",
     unsafe_allow_html=True,
 )
 
