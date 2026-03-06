@@ -291,13 +291,6 @@ with c4:
             Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
         </div>
     </div>
-
-    <div class="progress-wrap">
-        <div class="progress-label">Avance de efectividad</div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width:{ef_pct}%; background:{ef['text']};"></div>
-        </div>
-    </div>
     """,
         unsafe_allow_html=True,
     )
@@ -391,3 +384,4 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+
