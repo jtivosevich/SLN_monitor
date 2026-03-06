@@ -77,15 +77,15 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     position: absolute;
     top: 0;
     left: 0;
-    width: 35%;
+    width: 45%;
     height: 100%;
     background: linear-gradient(
         90deg,
         rgba(255,255,255,0.00) 0%,
-        rgba(255,255,255,0.16) 50%,
+        rgba(255,255,255,0.28) 50%,
         rgba(255,255,255,0.00) 100%
     );
-    animation: shine 3.2s linear infinite;
+    animation: shine 2.2s linear infinite;
     pointer-events: none;
 }
 </style>
@@ -456,3 +456,4 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
+
