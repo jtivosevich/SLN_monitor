@@ -60,6 +60,31 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     opacity: 0.8;
     margin-top: 6px;
 }
+
+/* Barra de progreso visual */
+.progress-wrap {
+    margin-top: 8px;
+    margin-bottom: 2px;
+}
+
+.progress-label {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -213,6 +238,7 @@ def efectividad_style(pct: float):
         return {"bg": "rgba(0,200,83,0.14)", "border": "#00C853", "text": "#00C853"}
 
 ef = efectividad_style(efectividad)
+ef_pct = max(0.0, min(100.0, efectividad))
 
 # ---------------- KPIs ----------------
 # ✅ KPIs de vencimiento = SOLO casos SIN transportista
@@ -265,6 +291,13 @@ with c4:
             Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
         </div>
     </div>
+
+    <div class="progress-wrap">
+        <div class="progress-label">Avance de efectividad</div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:{ef_pct}%; background:{ef['text']};"></div>
+        </div>
+    </div>
     """,
         unsafe_allow_html=True,
     )
@@ -286,7 +319,6 @@ if not df_valid.empty:
         next_os_list = sorted(grupo[COL_OS_DB].astype(str).unique().tolist())
         next_count = len(next_os_list)
 
-# (Se mantiene el expander siempre, para que no “desaparezca”)
 with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
     if next_count > 0:
         st.dataframe(pd.DataFrame({"O/S": next_os_list}), use_container_width=True, hide_index=True, height=240)
