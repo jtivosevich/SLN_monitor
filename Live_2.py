@@ -62,6 +62,32 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     opacity: 0.82;
     margin-top: 6px;
 }
+
+/* BRILLO ANIMADO BARRA EFECTIVIDAD */
+@keyframes shine {
+    0% {
+        transform: translateX(-140%);
+    }
+    100% {
+        transform: translateX(260%);
+    }
+}
+
+.progress-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 35%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.16) 50%,
+        rgba(255,255,255,0.00) 100%
+    );
+    animation: shine 3.2s linear infinite;
+    pointer-events: none;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -329,22 +355,10 @@ border-radius:999px;
 transition:width 0.9s ease-in-out;
 box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
 position:relative;
+overflow:hidden;
 ">
 
-<div style="
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:linear-gradient(
-90deg,
-rgba(255,255,255,0.00) 0%,
-rgba(255,255,255,0.18) 45%,
-rgba(255,255,255,0.00) 100%
-);
-opacity:0.7;
-"></div>
+<div class="progress-shine"></div>
 
 </div>
 </div>
@@ -442,4 +456,3 @@ def style_row(row):
 
 styled_df = tabla.style.apply(style_row, axis=1)
 st.dataframe(styled_df, use_container_width=True, hide_index=True, height=720)
-
