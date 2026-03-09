@@ -11,8 +11,6 @@ SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_KEY = st.secrets["supabase"]["anon_key"]
 SUPABASE_TABLE = "programacion_transporte_test"
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 COL_OS_DB = "os"
 COL_FECHA_DB = "fecha_programacion"
 COL_UPDATED_DB = "updated_at"
@@ -32,6 +30,13 @@ st.markdown(
 
 /* TITULOS */
 h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
+
+/* BOTON */
+div.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    height: 44px !important;
+}
 
 /* TARJETAS KPI */
 .kpi-card {
@@ -66,12 +71,8 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 /* BRILLO ANIMADO BARRA EFECTIVIDAD */
 @keyframes shine {
-    0% {
-        transform: translateX(-140%);
-    }
-    100% {
-        transform: translateX(260%);
-    }
+    0% { transform: translateX(-140%); }
+    100% { transform: translateX(260%); }
 }
 
 .progress-shine {
@@ -138,13 +139,11 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 14px;
     font-weight: 700;
     color: rgba(255,255,255,0.90);
-
     background: linear-gradient(
         180deg,
         rgba(28,32,40,0.98) 0%,
         rgba(18,21,27,0.98) 100%
     );
-
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -237,11 +236,14 @@ refresh_counter = st_autorefresh(interval=REFRESH_MS, key="refresh")
 # ROTACIÓN (segundos)
 ROTATION_WINDOW = 15
 
-# TITULO PRINCIPAL
-st.title("Vencimientos Servicios de HOY")
+# ---------------- FUNCIONES CACHEADAS ----------------
+@st.cache_resource
+def get_supabase_client() -> Client:
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ---------------- LOAD DATA ----------------
+@st.cache_data(ttl=15)
 def load_data_from_supabase() -> pd.DataFrame:
+    supabase = get_supabase_client()
     cols = f"{COL_OS_DB},{COL_FECHA_DB},{COL_UPDATED_DB},{COL_ESTADO_ACT_DB},{COL_TRANSP_DB}"
     resp = supabase.table(SUPABASE_TABLE).select(cols).execute()
     data = resp.data or []
@@ -249,6 +251,24 @@ def load_data_from_supabase() -> pd.DataFrame:
         return pd.DataFrame(columns=[COL_OS_DB, COL_FECHA_DB, COL_UPDATED_DB, COL_ESTADO_ACT_DB, COL_TRANSP_DB])
     return pd.DataFrame(data)
 
+# TITULO PRINCIPAL
+st.title("Vencimientos Servicios de HOY")
+
+# ---------------- BOTÓN FORZAR RECARGA ----------------
+c_btn1, c_btn2 = st.columns([1.1, 4])
+
+with c_btn1:
+    if st.button("🔄 Forzar recarga", use_container_width=True):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.rerun()
+
+with c_btn2:
+    st.caption("Usa este botón si la app despertó y los datos no se ven actualizados.")
+
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+# ---------------- LOAD DATA ----------------
 df = load_data_from_supabase()
 
 # ---------------- RELOJ + ÚLTIMA LECTURA ----------------
@@ -273,11 +293,11 @@ with c_time1:
     )
 
 with c_time2:
-    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
+    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated is not None else "—"
     st.markdown(
         f"""
 <div style="text-align:right;">
-    🗄️ Última actualización: <b>{ultima_txt}</b>
+    🗄️ Última lectura desde Supabase: <b>{ultima_txt}</b>
 </div>
 """,
         unsafe_allow_html=True,
@@ -534,7 +554,6 @@ df["_ord"] = df["EstadoTiempo"].map(order_map).fillna(99)
 df_sorted = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"]).copy()
 
 blink_on = (datetime.now(TZ).second % 2 == 0)
-
 phase = (refresh_counter // ROTATION_WINDOW) % 2
 
 if phase == 0:
@@ -634,4 +653,3 @@ def render_premium_table(df_table: pd.DataFrame, height_px: int = 720) -> str:
 
 tabla_html = render_premium_table(tabla, height_px=720)
 st.markdown(tabla_html, unsafe_allow_html=True)
-
