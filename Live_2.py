@@ -33,11 +33,45 @@ st.markdown(
 /* TITULOS */
 h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
-/* BOTONES */
+/* BOTONES GENERALES */
 div.stButton > button {
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     font-weight: 700 !important;
-    height: 46px !important;
+    height: 58px !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: rgba(255,255,255,0.92) !important;
+    background: linear-gradient(
+        180deg,
+        rgba(28,32,40,0.98) 0%,
+        rgba(18,21,27,0.98) 100%
+    ) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+    transition: all 0.18s ease-in-out !important;
+}
+
+div.stButton > button:hover {
+    border: 1px solid rgba(255,255,255,0.16) !important;
+    background: linear-gradient(
+        180deg,
+        rgba(38,43,54,0.98) 0%,
+        rgba(24,28,35,0.98) 100%
+    ) !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22) !important;
+    transform: translateY(-1px);
+}
+
+/* BOTON ACTIVO */
+.active-view button {
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    background: linear-gradient(
+        180deg,
+        rgba(42,48,60,0.98) 0%,
+        rgba(22,26,34,0.98) 100%
+    ) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.03),
+        0 10px 28px rgba(0,0,0,0.24) !important;
+    color: #ffffff !important;
 }
 
 /* TARJETAS KPI */
@@ -236,9 +270,9 @@ REFRESH_MS = 1000
 refresh_counter = st_autorefresh(interval=REFRESH_MS, key="refresh")
 
 # ROTACIÓN
-ROTATION_WINDOW = 15  # 15 refresh = 15 segundos si REFRESH_MS = 1000
+ROTATION_WINDOW = 15
 
-# OFFSET PARA SALTAR DE PANTALLA SIN DESACTIVAR ROTACIÓN
+# OFFSET
 if "rotation_offset" not in st.session_state:
     st.session_state.rotation_offset = 0
 
@@ -542,21 +576,35 @@ blink_on = (datetime.now(TZ).second % 2 == 0)
 
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-st.markdown("#### Pantalla")
+base_phase = (refresh_counter // ROTATION_WINDOW) % 2
+
+st.markdown("## Pantalla")
+
+phase_preview = (base_phase + st.session_state.rotation_offset) % 2
 
 col_btn1, col_btn2 = st.columns(2)
 
-base_phase = (refresh_counter // ROTATION_WINDOW) % 2
-
 with col_btn1:
-    if st.button("Ver Vencidos", use_container_width=True):
-        st.session_state.rotation_offset = (0 - base_phase) % 2
-        st.rerun()
+    if phase_preview == 0:
+        st.markdown('<div class="active-view">', unsafe_allow_html=True)
+    btn_v = st.button("Ver Vencidos", use_container_width=True)
+    if phase_preview == 0:
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col_btn2:
-    if st.button("Ver Urgentes y Por vencer", use_container_width=True):
-        st.session_state.rotation_offset = (1 - base_phase) % 2
-        st.rerun()
+    if phase_preview == 1:
+        st.markdown('<div class="active-view">', unsafe_allow_html=True)
+    btn_u = st.button("Ver Urgentes y Por vencer", use_container_width=True)
+    if phase_preview == 1:
+        st.markdown('</div>', unsafe_allow_html=True)
+
+if btn_v:
+    st.session_state.rotation_offset = (0 - base_phase) % 2
+    st.rerun()
+
+if btn_u:
+    st.session_state.rotation_offset = (1 - base_phase) % 2
+    st.rerun()
 
 phase = (base_phase + st.session_state.rotation_offset) % 2
 
