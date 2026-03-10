@@ -33,6 +33,13 @@ st.markdown(
 /* TITULOS */
 h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
+/* BOTONES */
+div.stButton > button {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    height: 46px !important;
+}
+
 /* TARJETAS KPI */
 .kpi-card {
     height: 120px;
@@ -66,12 +73,8 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 /* BRILLO ANIMADO BARRA EFECTIVIDAD */
 @keyframes shine {
-    0% {
-        transform: translateX(-140%);
-    }
-    100% {
-        transform: translateX(260%);
-    }
+    0% { transform: translateX(-140%); }
+    100% { transform: translateX(260%); }
 }
 
 .progress-shine {
@@ -138,13 +141,11 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 14px;
     font-weight: 700;
     color: rgba(255,255,255,0.90);
-
     background: linear-gradient(
         180deg,
         rgba(28,32,40,0.98) 0%,
         rgba(18,21,27,0.98) 100%
     );
-
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -235,7 +236,11 @@ REFRESH_MS = 1000
 refresh_counter = st_autorefresh(interval=REFRESH_MS, key="refresh")
 
 # ROTACIÓN
-ROTATION_WINDOW = 15  # 15 refresh = 15 segundos con REFRESH_MS = 1000
+ROTATION_WINDOW = 15  # 15 refresh = 15 segundos si REFRESH_MS = 1000
+
+# OFFSET PARA SALTAR DE PANTALLA SIN DESACTIVAR ROTACIÓN
+if "rotation_offset" not in st.session_state:
+    st.session_state.rotation_offset = 0
 
 # TITULO PRINCIPAL
 st.title("Vencimientos Servicios de HOY")
@@ -528,7 +533,7 @@ with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
     else:
         st.info("No hay próximos vencimientos sin transportista.")
 
-# ---------------- TABLA + ROTACIÓN / MODO MANUAL ----------------
+# ---------------- TABLA + BOTONES DE SALTO ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
 df["_ord"] = df["EstadoTiempo"].map(order_map).fillna(99)
 df_sorted = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"]).copy()
@@ -537,54 +542,36 @@ blink_on = (datetime.now(TZ).second % 2 == 0)
 
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-col_sel1, col_sel2 = st.columns([1.2, 2.2])
+st.markdown("#### Pantalla")
 
-with col_sel1:
-    modo_vista = st.radio(
-        "Modo de vista",
-        ["Automático", "Manual"],
-        horizontal=True,
-        key="modo_vista_tabla",
-    )
+col_btn1, col_btn2 = st.columns(2)
 
-with col_sel2:
-    vista_manual = st.radio(
-        "Pantalla manual",
-        ["Vencidos", "Urgentes y Por vencer"],
-        horizontal=True,
-        key="vista_manual_tabla",
-        disabled=(modo_vista == "Automático"),
-    )
+base_phase = (refresh_counter // ROTATION_WINDOW) % 2
 
-if modo_vista == "Automático":
-    phase = (refresh_counter // ROTATION_WINDOW) % 2
+with col_btn1:
+    if st.button("Ver Vencidos", use_container_width=True):
+        st.session_state.rotation_offset = (0 - base_phase) % 2
+        st.rerun()
 
-    if phase == 0:
-        view_title = "Servicios Vencidos"
-        tabla_view = df_sorted[
-            (df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista
-        ].copy()
-    else:
-        view_title = "Servicios Urgentes y Por Vencer"
-        tabla_view = df_sorted[
-            (df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])) & sin_transportista
-        ].copy()
+with col_btn2:
+    if st.button("Ver Urgentes y Por vencer", use_container_width=True):
+        st.session_state.rotation_offset = (1 - base_phase) % 2
+        st.rerun()
 
-    st.caption("Modo automático activo: la tabla rota entre Vencidos y Urgentes/Por vencer.")
+phase = (base_phase + st.session_state.rotation_offset) % 2
 
+if phase == 0:
+    view_title = "Servicios Vencidos"
+    tabla_view = df_sorted[
+        (df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista
+    ].copy()
+    st.caption("Rotación automática activa. Vista actual: Vencidos.")
 else:
-    if vista_manual == "Vencidos":
-        view_title = "Servicios Vencidos"
-        tabla_view = df_sorted[
-            (df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista
-        ].copy()
-    else:
-        view_title = "Servicios Urgentes y Por Vencer"
-        tabla_view = df_sorted[
-            (df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])) & sin_transportista
-        ].copy()
-
-    st.caption(f"Modo manual activo: mostrando {vista_manual}.")
+    view_title = "Servicios Urgentes y Por Vencer"
+    tabla_view = df_sorted[
+        (df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])) & sin_transportista
+    ].copy()
+    st.caption("Rotación automática activa. Vista actual: Urgentes y Por vencer.")
 
 st.subheader(view_title)
 
