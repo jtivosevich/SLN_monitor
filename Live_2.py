@@ -28,76 +28,10 @@ st.markdown(
     """
 <style>
 /* CONTENEDOR */
-.block-container {
-    padding-top: 0.6rem !important;
-    padding-bottom: 0.8rem !important;
-}
+.block-container { padding-top: 0.6rem !important; padding-bottom: 0.8rem !important; }
 
 /* TITULOS */
-h1 {
-    margin-bottom: 0.2rem !important;
-    font-weight: 800 !important;
-}
-
-/* COLUMNAS DE BOTONES */
-[data-testid="column"] div.stButton {
-    width: 100%;
-}
-
-/* BOTONES GENERALES */
-div.stButton > button {
-    width: 100% !important;
-    min-height: 58px !important;
-    height: 58px !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding: 0 16px !important;
-
-    border-radius: 14px !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-
-    color: rgba(255,255,255,0.92) !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-
-    background: linear-gradient(
-        180deg,
-        rgba(28,32,40,0.98) 0%,
-        rgba(18,21,27,0.98) 100%
-    ) !important;
-
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
-    transition: all 0.18s ease-in-out !important;
-}
-
-/* HOVER */
-div.stButton > button:hover {
-    border: 1px solid rgba(255,255,255,0.16) !important;
-    background: linear-gradient(
-        180deg,
-        rgba(38,43,54,0.98) 0%,
-        rgba(24,28,35,0.98) 100%
-    ) !important;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.22) !important;
-    transform: translateY(-1px);
-}
-
-/* CLICK */
-div.stButton > button:active {
-    transform: translateY(0px) !important;
-    box-shadow: 0 5px 14px rgba(0,0,0,0.18) !important;
-}
-
-/* FOCUS */
-div.stButton > button:focus,
-div.stButton > button:focus-visible {
-    outline: none !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    box-shadow:
-        0 0 0 1px rgba(255,255,255,0.04) inset,
-        0 0 0 3px rgba(255,255,255,0.06),
-        0 8px 22px rgba(0,0,0,0.20) !important;
-}
+h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 /* TARJETAS KPI */
 .kpi-card {
@@ -132,8 +66,12 @@ div.stButton > button:focus-visible {
 
 /* BRILLO ANIMADO BARRA EFECTIVIDAD */
 @keyframes shine {
-    0% { transform: translateX(-140%); }
-    100% { transform: translateX(260%); }
+    0% {
+        transform: translateX(-140%);
+    }
+    100% {
+        transform: translateX(260%);
+    }
 }
 
 .progress-shine {
@@ -200,11 +138,13 @@ div.stButton > button:focus-visible {
     font-size: 14px;
     font-weight: 700;
     color: rgba(255,255,255,0.90);
+
     background: linear-gradient(
         180deg,
         rgba(28,32,40,0.98) 0%,
         rgba(18,21,27,0.98) 100%
     );
+
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -294,12 +234,8 @@ div.stButton > button:focus-visible {
 REFRESH_MS = 1000
 refresh_counter = st_autorefresh(interval=REFRESH_MS, key="refresh")
 
-# ROTACIÓN
-ROTATION_WINDOW = 15  # 15 refresh = 15 segundos si REFRESH_MS = 1000
-
-# OFFSET PARA SALTAR DE PANTALLA SIN DESACTIVAR ROTACIÓN
-if "rotation_offset" not in st.session_state:
-    st.session_state.rotation_offset = 0
+# ROTACIÓN (segundos)
+ROTATION_WINDOW = 15
 
 # TITULO PRINCIPAL
 st.title("Vencimientos Servicios de HOY")
@@ -337,7 +273,7 @@ with c_time1:
     )
 
 with c_time2:
-    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated is not None else "—"
+    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
     st.markdown(
         f"""
 <div style="text-align:right;">
@@ -592,75 +528,23 @@ with st.expander(f"Ver O/S del próximo vencimiento ({next_count})"):
     else:
         st.info("No hay próximos vencimientos sin transportista.")
 
-# ---------------- TABLA + BOTONES DE SALTO ----------------
+# ---------------- TABLA + ROTACIÓN ----------------
 order_map = {"VENCIDO": 0, "URGENTE": 1, "POR VENCER": 2, "SIN FECHA": 3}
 df["_ord"] = df["EstadoTiempo"].map(order_map).fillna(99)
 df_sorted = df.sort_values(by=["_ord", COL_FECHA_DB]).drop(columns=["_ord"]).copy()
 
 blink_on = (datetime.now(TZ).second % 2 == 0)
 
-st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
-base_phase = (refresh_counter // ROTATION_WINDOW) % 2
-phase_preview = (base_phase + st.session_state.rotation_offset) % 2
-vista_actual_txt = "Vencidos" if phase_preview == 0 else "Urgentes y Por vencer"
-
-st.markdown("## Pantalla")
-
-st.markdown(
-    f"""
-    <div style="
-        display:inline-block;
-        margin-bottom:12px;
-        padding:8px 14px;
-        border-radius:999px;
-        border:1px solid rgba(255,255,255,0.08);
-        background: linear-gradient(
-            180deg,
-            rgba(28,32,40,0.98) 0%,
-            rgba(18,21,27,0.98) 100%
-        );
-        color: rgba(255,255,255,0.92);
-        font-size:14px;
-        font-weight:700;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-    ">
-        Vista actual: {vista_actual_txt}
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-col_btn1, col_btn2 = st.columns(2)
-
-with col_btn1:
-    btn_v = st.button("Ver Vencidos", use_container_width=True)
-
-with col_btn2:
-    btn_u = st.button("Ver Urgentes y Por vencer", use_container_width=True)
-
-if btn_v:
-    st.session_state.rotation_offset = (0 - base_phase) % 2
-    st.rerun()
-
-if btn_u:
-    st.session_state.rotation_offset = (1 - base_phase) % 2
-    st.rerun()
-
-phase = (base_phase + st.session_state.rotation_offset) % 2
+phase = (refresh_counter // ROTATION_WINDOW) % 2
 
 if phase == 0:
+    df_v = df_sorted[(df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista].copy()
     view_title = "Servicios Vencidos"
-    tabla_view = df_sorted[
-        (df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista
-    ].copy()
-    st.caption("Rotación automática activa. Vista actual: Vencidos.")
+    tabla_view = df_v
 else:
+    df_u = df_sorted[df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"]) & sin_transportista].copy()
     view_title = "Servicios Urgentes y Por Vencer"
-    tabla_view = df_sorted[
-        (df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])) & sin_transportista
-    ].copy()
-    st.caption("Rotación automática activa. Vista actual: Urgentes y Por vencer.")
+    tabla_view = df_u
 
 st.subheader(view_title)
 
