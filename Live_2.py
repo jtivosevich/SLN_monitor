@@ -618,6 +618,7 @@ else:
     tabla_view = df_sorted[
         (df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])) & sin_transportista
     ].copy()
+    
 
 st.subheader(view_title)
 
