@@ -565,13 +565,11 @@ if phase == 0:
     tabla_view = df_sorted[
         (df_sorted["EstadoTiempo"] == "VENCIDO") & sin_transportista
     ].copy()
-    st.caption("Rotación automática activa. Vista actual: Vencidos.")
 else:
     view_title = "Servicios Urgentes y Por Vencer"
     tabla_view = df_sorted[
         (df_sorted["EstadoTiempo"].isin(["URGENTE", "POR VENCER"])) & sin_transportista
     ].copy()
-    st.caption("Rotación automática activa. Vista actual: Urgentes y Por vencer.")
 
 st.subheader(view_title)
 
