@@ -45,9 +45,51 @@ h1 {
     font-weight: 800 !important;
 }
 
-/* TARJETAS KPI */
+h2, h3 {
+    margin-bottom: 0.35rem !important;
+}
+
+/* =========================
+   INFO SUPERIOR
+========================= */
+.top-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 2px;
+    margin-bottom: 8px;
+}
+
+.top-info-item {
+    font-size: 14px;
+    line-height: 1.35;
+    color: rgba(255,255,255,0.92);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-info-left {
+    text-align: left;
+}
+
+.top-info-right {
+    text-align: right;
+}
+
+/* =========================
+   KPI GRID
+========================= */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
 .kpi-card {
-    height: 120px;
+    min-height: 120px;
     border-radius: 14px;
     padding: 16px 18px;
     display: flex;
@@ -134,7 +176,7 @@ h1 {
 
 .premium-table {
     width: 100%;
-    min-width: 810px;
+    min-width: 860px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -188,12 +230,12 @@ h1 {
 
 .premium-table th:nth-child(4),
 .premium-table td:nth-child(4) {
-    width: 150px;
+    width: 165px;
 }
 
 .premium-table th:nth-child(5),
 .premium-table td:nth-child(5) {
-    width: 220px;
+    width: 235px;
 }
 
 .risk-dot {
@@ -238,142 +280,152 @@ h1 {
 
 /* =========================
    RESPONSIVE SOLO TELÉFONO
-   NO TOCA PC
 ========================= */
 @media (max-width: 768px) {
 
     .block-container {
-        padding-top: 0.35rem !important;
-        padding-bottom: 0.55rem !important;
+        padding-top: 0.28rem !important;
+        padding-bottom: 0.65rem !important;
         padding-left: 0.55rem !important;
         padding-right: 0.55rem !important;
     }
 
     h1 {
-        font-size: 1.55rem !important;
+        font-size: 1.18rem !important;
+        line-height: 1.10 !important;
+        margin-bottom: 0.38rem !important;
+    }
+
+    h2 {
+        font-size: 1.02rem !important;
         line-height: 1.15 !important;
-        margin-bottom: 0.35rem !important;
     }
 
-    h2, h3 {
+    h3 {
+        font-size: 0.98rem !important;
         line-height: 1.15 !important;
     }
 
-    /* Hace que las columnas se apilen en móvil */
-    div[data-testid="stHorizontalBlock"] {
-        flex-wrap: wrap !important;
-        gap: 0.6rem !important;
+    .top-info-grid {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        margin-bottom: 10px;
     }
 
-    div[data-testid="column"] {
-        min-width: 100% !important;
-        flex: 1 1 100% !important;
+    .top-info-item {
+        font-size: 12.5px !important;
+        line-height: 1.2 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
     }
 
-    /* KPI más compactos en móvil */
+    .top-info-left,
+    .top-info-right {
+        text-align: left !important;
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
     .kpi-card {
-        height: auto !important;
-        min-height: 96px !important;
-        padding: 13px 14px !important;
+        min-height: 92px !important;
+        padding: 11px 12px !important;
         border-radius: 12px !important;
     }
 
     .kpi-title {
-        font-size: 16px !important;
-        line-height: 1.15 !important;
+        font-size: 13.5px !important;
+        line-height: 1.10 !important;
     }
 
     .kpi-value {
-        font-size: 30px !important;
-        line-height: 1.05 !important;
+        font-size: 26px !important;
+        line-height: 1.02 !important;
         margin-top: 2px !important;
     }
 
     .kpi-sub {
-        font-size: 12px !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
         margin-top: 4px !important;
     }
 
-    /* Texto de hora/ultima actualización */
-    .mobile-stack-info {
-        text-align: left !important;
-        font-size: 13px !important;
-        line-height: 1.35 !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-    }
-
-    /* Barra efectividad */
     .mobile-ef-row {
-        font-size: 14px !important;
+        font-size: 13px !important;
+        line-height: 1.2 !important;
     }
 
-    /* Expander */
     .streamlit-expanderHeader {
-        font-size: 14px !important;
+        font-size: 13px !important;
     }
 
-    /* Tabla */
     .table-shell {
         border-radius: 12px !important;
     }
 
     .table-scroll {
-        max-height: 62vh !important;
+        max-height: 56vh !important;
     }
 
     .premium-table {
-        min-width: 690px !important;
+        min-width: 760px !important;
     }
 
     .premium-table thead th {
-        font-size: 12px !important;
-        padding: 11px 10px !important;
+        font-size: 11.5px !important;
+        padding: 10px 10px !important;
     }
 
     .premium-table tbody td {
-        font-size: 12px !important;
-        padding: 10px 10px !important;
+        font-size: 11.5px !important;
+        padding: 9px 10px !important;
+        line-height: 1.2 !important;
     }
 
     .premium-table th:nth-child(1),
     .premium-table td:nth-child(1) {
-        width: 62px !important;
+        width: 52px !important;
     }
 
     .premium-table th:nth-child(2),
     .premium-table td:nth-child(2) {
-        width: 80px !important;
+        width: 74px !important;
     }
 
     .premium-table th:nth-child(3),
     .premium-table td:nth-child(3) {
-        width: 210px !important;
+        width: 215px !important;
     }
 
     .premium-table th:nth-child(4),
     .premium-table td:nth-child(4) {
-        width: 120px !important;
+        width: 130px !important;
     }
 
     .premium-table th:nth-child(5),
     .premium-table td:nth-child(5) {
-        width: 190px !important;
+        width: 185px !important;
     }
 
     .risk-dot {
-        width: 13px !important;
-        height: 13px !important;
+        width: 12px !important;
+        height: 12px !important;
     }
 
-    /* Dataframe dentro del expander */
     div[data-testid="stDataFrame"] {
         width: 100% !important;
     }
 
-    /* Botones y controles ocupan mejor ancho en teléfono */
     button, .stButton > button {
         width: 100%;
+    }
+
+    html {
+        -webkit-text-size-adjust: 100%;
     }
 }
 </style>
@@ -411,30 +463,20 @@ if not df.empty and COL_UPDATED_DB in df.columns:
     if tmp.notna().any():
         last_updated = tmp.max()
 
-c_time1, c_time2 = st.columns([1, 1])
+hora_txt = now_ui.strftime('%Y-%m-%d %H:%M:%S')
+ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
 
-with c_time1:
-    st.markdown(
-        f"""
-<div class="mobile-stack-info" style="text-align:left;">
-    🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
+st.markdown(
+    f"""
+<div class="top-info-grid">
+    <div class="top-info-item top-info-left">🕒 Hora actual: <b>{hora_txt}</b></div>
+    <div class="top-info-item top-info-right">🗄️ Última actualización: <b>{ultima_txt}</b></div>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
+    unsafe_allow_html=True,
+)
 
-with c_time2:
-    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
-    st.markdown(
-        f"""
-<div class="mobile-stack-info" style="text-align:right;">
-    🗄️ Última actualización: <b>{ultima_txt}</b>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-
-st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
 # ---------------- VALIDACIONES ----------------
 missing = [c for c in [COL_OS_DB, COL_FECHA_DB] if c not in df.columns]
@@ -559,60 +601,39 @@ vencidos = int(((df["EstadoTiempo"] == "VENCIDO") & sin_transportista).sum())
 urgentes = int(((df["EstadoTiempo"] == "URGENTE") & sin_transportista).sum())
 por_vencer = int(((df["EstadoTiempo"] == "POR VENCER") & sin_transportista).sum())
 
-c1, c2, c3, c4 = st.columns(4)
+st.markdown(
+    f"""
+<div class="kpi-grid">
+    <div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
+        <div class="kpi-title">Vencidos</div>
+        <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
+    </div>
 
-with c1:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
-    <div class="kpi-title">Vencidos</div>
-    <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
+    <div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
+        <div class="kpi-title">Urgentes (&lt;30m)</div>
+        <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
+    </div>
 
-with c2:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
-    <div class="kpi-title">Urgentes (&lt;30m)</div>
-    <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
+    <div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
+        <div class="kpi-title">Por vencer</div>
+        <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
+    </div>
 
-with c3:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
-    <div class="kpi-title">Por vencer</div>
-    <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-
-with c4:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
-    <div class="kpi-title">Efectividad</div>
-    <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
-    <div class="kpi-sub">
-        Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
+    <div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
+        <div class="kpi-title">Efectividad</div>
+        <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
+        <div class="kpi-sub">Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b></div>
     </div>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
+    unsafe_allow_html=True,
+)
 
-st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
 
 # ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
 st.markdown(f"""
-<div style="margin-top:10px; margin-bottom:18px;">
+<div style="margin-top:8px; margin-bottom:16px;">
 
 <div class="mobile-ef-row" style="
 display:flex;
