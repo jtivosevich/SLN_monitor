@@ -45,6 +45,10 @@ h1 {
     font-weight: 800 !important;
 }
 
+h2, h3 {
+    margin-bottom: 0.35rem !important;
+}
+
 /* TARJETAS KPI */
 .kpi-card {
     height: 120px;
@@ -236,6 +240,12 @@ h1 {
     font-weight: 800;
 }
 
+/* Info superior */
+.info-row {
+    font-size: 14px;
+    line-height: 1.35;
+}
+
 /* =========================
    RESPONSIVE SOLO TELÉFONO
    NO TOCA PC
@@ -244,25 +254,31 @@ h1 {
 
     .block-container {
         padding-top: 0.35rem !important;
-        padding-bottom: 0.55rem !important;
-        padding-left: 0.55rem !important;
-        padding-right: 0.55rem !important;
+        padding-bottom: 0.70rem !important;
+        padding-left: 0.70rem !important;
+        padding-right: 0.70rem !important;
     }
 
     h1 {
-        font-size: 1.55rem !important;
-        line-height: 1.15 !important;
-        margin-bottom: 0.35rem !important;
+        font-size: 1.45rem !important;
+        line-height: 1.12 !important;
+        margin-bottom: 0.30rem !important;
     }
 
-    h2, h3 {
+    h2 {
+        font-size: 1.10rem !important;
         line-height: 1.15 !important;
     }
 
-    /* Hace que las columnas se apilen en móvil */
+    h3 {
+        font-size: 1rem !important;
+        line-height: 1.15 !important;
+    }
+
+    /* Hace que columnas se apilen bien en móvil */
     div[data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
-        gap: 0.6rem !important;
+        gap: 0.55rem !important;
     }
 
     div[data-testid="column"] {
@@ -270,47 +286,67 @@ h1 {
         flex: 1 1 100% !important;
     }
 
-    /* KPI más compactos en móvil */
+    /* Reduce espacio vertical extraño entre elementos */
+    div[data-testid="stVerticalBlock"] > div:has(> div[data-testid="stHorizontalBlock"]) {
+        gap: 0.55rem !important;
+    }
+
+    /* KPI más compactos */
     .kpi-card {
         height: auto !important;
-        min-height: 96px !important;
-        padding: 13px 14px !important;
+        min-height: 92px !important;
+        padding: 12px 14px !important;
         border-radius: 12px !important;
     }
 
     .kpi-title {
-        font-size: 16px !important;
-        line-height: 1.15 !important;
+        font-size: 15px !important;
+        line-height: 1.12 !important;
     }
 
     .kpi-value {
-        font-size: 30px !important;
-        line-height: 1.05 !important;
-        margin-top: 2px !important;
+        font-size: 28px !important;
+        line-height: 1.02 !important;
+        margin-top: 3px !important;
     }
 
     .kpi-sub {
-        font-size: 12px !important;
-        margin-top: 4px !important;
+        font-size: 11.8px !important;
+        line-height: 1.25 !important;
+        margin-top: 5px !important;
     }
 
-    /* Texto de hora/ultima actualización */
+    /* Texto hora / actualización */
     .mobile-stack-info {
         text-align: left !important;
-        font-size: 13px !important;
+        font-size: 12.5px !important;
         line-height: 1.35 !important;
         white-space: normal !important;
         word-break: break-word !important;
+        padding: 0 !important;
+    }
+
+    .info-row {
+        font-size: 12.5px !important;
+        line-height: 1.35 !important;
     }
 
     /* Barra efectividad */
     .mobile-ef-row {
-        font-size: 14px !important;
+        font-size: 13px !important;
+        line-height: 1.2 !important;
+        gap: 8px !important;
     }
 
     /* Expander */
     .streamlit-expanderHeader {
-        font-size: 14px !important;
+        font-size: 13px !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Ajusta padding del expander */
+    details {
+        border-radius: 12px !important;
     }
 
     /* Tabla */
@@ -319,61 +355,67 @@ h1 {
     }
 
     .table-scroll {
-        max-height: 62vh !important;
+        max-height: 58vh !important;
     }
 
     .premium-table {
-        min-width: 690px !important;
+        min-width: 660px !important;
     }
 
     .premium-table thead th {
-        font-size: 12px !important;
-        padding: 11px 10px !important;
+        font-size: 11.5px !important;
+        padding: 10px 9px !important;
     }
 
     .premium-table tbody td {
-        font-size: 12px !important;
-        padding: 10px 10px !important;
+        font-size: 11.5px !important;
+        padding: 9px 9px !important;
+        line-height: 1.25 !important;
     }
 
     .premium-table th:nth-child(1),
     .premium-table td:nth-child(1) {
-        width: 62px !important;
+        width: 56px !important;
     }
 
     .premium-table th:nth-child(2),
     .premium-table td:nth-child(2) {
-        width: 80px !important;
+        width: 76px !important;
     }
 
     .premium-table th:nth-child(3),
     .premium-table td:nth-child(3) {
-        width: 210px !important;
+        width: 205px !important;
     }
 
     .premium-table th:nth-child(4),
     .premium-table td:nth-child(4) {
-        width: 120px !important;
+        width: 108px !important;
     }
 
     .premium-table th:nth-child(5),
     .premium-table td:nth-child(5) {
-        width: 190px !important;
+        width: 185px !important;
     }
 
     .risk-dot {
-        width: 13px !important;
-        height: 13px !important;
+        width: 12px !important;
+        height: 12px !important;
     }
 
-    /* Dataframe dentro del expander */
+    /* dataframe dentro del expander */
     div[data-testid="stDataFrame"] {
         width: 100% !important;
     }
 
-    /* Botones y controles ocupan mejor ancho en teléfono */
+    /* botones */
     button, .stButton > button {
         width: 100%;
+    }
+
+    /* Evita que el usuario tenga que hacer zoom en iPhone */
+    html {
+        -webkit-text-size-adjust: 100%;
     }
 }
 </style>
@@ -416,7 +458,7 @@ c_time1, c_time2 = st.columns([1, 1])
 with c_time1:
     st.markdown(
         f"""
-<div class="mobile-stack-info" style="text-align:left;">
+<div class="mobile-stack-info info-row" style="text-align:left;">
     🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
 </div>
 """,
@@ -427,7 +469,7 @@ with c_time2:
     ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
     st.markdown(
         f"""
-<div class="mobile-stack-info" style="text-align:right;">
+<div class="mobile-stack-info info-row" style="text-align:right;">
     🗄️ Última actualización: <b>{ultima_txt}</b>
 </div>
 """,
