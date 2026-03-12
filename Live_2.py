@@ -470,7 +470,7 @@ margin-bottom:6px;
 font-size:15px;
 font-weight:600;
 ">
-<span>Efectividad/span>
+<span>Efectividad
 <span style="color:{ef['text']}; font-weight:800;">{efectividad:.1f}%</span>
 </div>
 
