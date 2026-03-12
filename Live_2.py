@@ -80,6 +80,12 @@ h2, h3 {
     margin-top: 6px;
 }
 
+/* FILA INFO SUPERIOR */
+.info-pill {
+    font-size: 14px;
+    line-height: 1.35;
+}
+
 /* BRILLO ANIMADO BARRA EFECTIVIDAD */
 @keyframes shine {
     0% { transform: translateX(-140%); }
@@ -138,7 +144,7 @@ h2, h3 {
 
 .premium-table {
     width: 100%;
-    min-width: 810px;
+    min-width: 860px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -192,12 +198,12 @@ h2, h3 {
 
 .premium-table th:nth-child(4),
 .premium-table td:nth-child(4) {
-    width: 150px;
+    width: 165px;
 }
 
 .premium-table th:nth-child(5),
 .premium-table td:nth-child(5) {
-    width: 220px;
+    width: 235px;
 }
 
 .risk-dot {
@@ -240,157 +246,140 @@ h2, h3 {
     font-weight: 800;
 }
 
-/* Info superior */
-.info-row {
-    font-size: 14px;
-    line-height: 1.35;
-}
-
 /* =========================
    RESPONSIVE SOLO TELÉFONO
-   NO TOCA PC
 ========================= */
 @media (max-width: 768px) {
 
     .block-container {
-        padding-top: 0.35rem !important;
-        padding-bottom: 0.70rem !important;
-        padding-left: 0.70rem !important;
-        padding-right: 0.70rem !important;
+        padding-top: 0.30rem !important;
+        padding-bottom: 0.65rem !important;
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
     }
 
     h1 {
-        font-size: 1.45rem !important;
-        line-height: 1.12 !important;
-        margin-bottom: 0.30rem !important;
+        font-size: 1.22rem !important;
+        line-height: 1.10 !important;
+        margin-bottom: 0.45rem !important;
     }
 
     h2 {
-        font-size: 1.10rem !important;
+        font-size: 1.02rem !important;
         line-height: 1.15 !important;
     }
 
     h3 {
-        font-size: 1rem !important;
+        font-size: 0.98rem !important;
         line-height: 1.15 !important;
     }
 
-    /* Hace que columnas se apilen bien en móvil */
+    /* por defecto streamlit apila columnas en móvil,
+       aquí lo dejamos más ordenado */
     div[data-testid="stHorizontalBlock"] {
-        flex-wrap: wrap !important;
-        gap: 0.55rem !important;
+        gap: 0.45rem !important;
     }
 
-    div[data-testid="column"] {
+    /* EXCEPCIÓN: la fila de KPIs en 2 columnas */
+    div[data-testid="stHorizontalBlock"]:has(.kpi-card) {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    div[data-testid="column"]:has(.kpi-card) {
+        min-width: calc(50% - 0.25rem) !important;
+        flex: 0 0 calc(50% - 0.25rem) !important;
+    }
+
+    /* la fila de hora / actualización sí queda apilada */
+    div[data-testid="column"]:has(.info-pill) {
         min-width: 100% !important;
         flex: 1 1 100% !important;
     }
 
-    /* Reduce espacio vertical extraño entre elementos */
-    div[data-testid="stVerticalBlock"] > div:has(> div[data-testid="stHorizontalBlock"]) {
-        gap: 0.55rem !important;
-    }
-
-    /* KPI más compactos */
     .kpi-card {
         height: auto !important;
         min-height: 92px !important;
-        padding: 12px 14px !important;
+        padding: 11px 12px !important;
         border-radius: 12px !important;
     }
 
     .kpi-title {
-        font-size: 15px !important;
-        line-height: 1.12 !important;
+        font-size: 13.5px !important;
+        line-height: 1.10 !important;
     }
 
     .kpi-value {
-        font-size: 28px !important;
+        font-size: 26px !important;
         line-height: 1.02 !important;
-        margin-top: 3px !important;
+        margin-top: 2px !important;
     }
 
     .kpi-sub {
-        font-size: 11.8px !important;
-        line-height: 1.25 !important;
-        margin-top: 5px !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        margin-top: 4px !important;
     }
 
-    /* Texto hora / actualización */
-    .mobile-stack-info {
-        text-align: left !important;
+    .info-pill {
         font-size: 12.5px !important;
-        line-height: 1.35 !important;
+        line-height: 1.22 !important;
         white-space: normal !important;
         word-break: break-word !important;
-        padding: 0 !important;
+        margin-bottom: 2px !important;
     }
 
-    .info-row {
-        font-size: 12.5px !important;
-        line-height: 1.35 !important;
-    }
-
-    /* Barra efectividad */
     .mobile-ef-row {
         font-size: 13px !important;
         line-height: 1.2 !important;
-        gap: 8px !important;
     }
 
-    /* Expander */
     .streamlit-expanderHeader {
         font-size: 13px !important;
-        line-height: 1.2 !important;
     }
 
-    /* Ajusta padding del expander */
-    details {
-        border-radius: 12px !important;
-    }
-
-    /* Tabla */
     .table-shell {
         border-radius: 12px !important;
     }
 
     .table-scroll {
-        max-height: 58vh !important;
+        max-height: 56vh !important;
     }
 
     .premium-table {
-        min-width: 660px !important;
+        min-width: 760px !important;
     }
 
     .premium-table thead th {
         font-size: 11.5px !important;
-        padding: 10px 9px !important;
+        padding: 10px 10px !important;
     }
 
     .premium-table tbody td {
         font-size: 11.5px !important;
-        padding: 9px 9px !important;
-        line-height: 1.25 !important;
+        padding: 9px 10px !important;
+        line-height: 1.2 !important;
     }
 
     .premium-table th:nth-child(1),
     .premium-table td:nth-child(1) {
-        width: 56px !important;
+        width: 52px !important;
     }
 
     .premium-table th:nth-child(2),
     .premium-table td:nth-child(2) {
-        width: 76px !important;
+        width: 74px !important;
     }
 
     .premium-table th:nth-child(3),
     .premium-table td:nth-child(3) {
-        width: 205px !important;
+        width: 215px !important;
     }
 
     .premium-table th:nth-child(4),
     .premium-table td:nth-child(4) {
-        width: 108px !important;
+        width: 130px !important;
     }
 
     .premium-table th:nth-child(5),
@@ -403,17 +392,14 @@ h2, h3 {
         height: 12px !important;
     }
 
-    /* dataframe dentro del expander */
     div[data-testid="stDataFrame"] {
         width: 100% !important;
     }
 
-    /* botones */
     button, .stButton > button {
         width: 100%;
     }
 
-    /* Evita que el usuario tenga que hacer zoom en iPhone */
     html {
         -webkit-text-size-adjust: 100%;
     }
@@ -458,7 +444,7 @@ c_time1, c_time2 = st.columns([1, 1])
 with c_time1:
     st.markdown(
         f"""
-<div class="mobile-stack-info info-row" style="text-align:left;">
+<div class="info-pill" style="text-align:left;">
     🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
 </div>
 """,
@@ -469,14 +455,14 @@ with c_time2:
     ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
     st.markdown(
         f"""
-<div class="mobile-stack-info info-row" style="text-align:right;">
+<div class="info-pill" style="text-align:right;">
     🗄️ Última actualización: <b>{ultima_txt}</b>
 </div>
 """,
         unsafe_allow_html=True,
     )
 
-st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
 
 # ---------------- VALIDACIONES ----------------
 missing = [c for c in [COL_OS_DB, COL_FECHA_DB] if c not in df.columns]
@@ -650,11 +636,11 @@ with c4:
         unsafe_allow_html=True,
     )
 
-st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
 # ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
 st.markdown(f"""
-<div style="margin-top:10px; margin-bottom:18px;">
+<div style="margin-top:8px; margin-bottom:16px;">
 
 <div class="mobile-ef-row" style="
 display:flex;
