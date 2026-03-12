@@ -35,8 +35,8 @@ st.markdown(
    CONTENEDOR
 ========================= */
 .block-container {
-    padding-top: 0.6rem !important;
-    padding-bottom: 0.8rem !important;
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.85rem !important;
 }
 
 /* TITULOS */
@@ -45,9 +45,44 @@ h1 {
     font-weight: 800 !important;
 }
 
-/* TARJETAS KPI */
+/* =========================
+   INFO TOP
+========================= */
+.top-info-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 6px;
+}
+
+.top-info-box {
+    font-size: 15px;
+    line-height: 1.35;
+    color: rgba(255,255,255,0.92);
+    white-space: nowrap;
+}
+
+.top-info-left {
+    text-align: left;
+}
+
+.top-info-right {
+    text-align: right;
+}
+
+/* =========================
+   KPI GRID
+========================= */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 6px;
+}
+
 .kpi-card {
-    height: 120px;
+    min-height: 120px;
     border-radius: 14px;
     padding: 16px 18px;
     display: flex;
@@ -62,21 +97,26 @@ h1 {
     font-weight: 600;
     opacity: 0.92;
     text-transform: none !important;
+    line-height: 1.15;
 }
 
 .kpi-value {
     font-size: 40px;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.08;
+    margin-top: 4px;
 }
 
 .kpi-sub {
     font-size: 14px;
     opacity: 0.82;
     margin-top: 6px;
+    line-height: 1.25;
 }
 
-/* BRILLO ANIMADO BARRA EFECTIVIDAD */
+/* =========================
+   BRILLO BARRA
+========================= */
 @keyframes shine {
     0% { transform: translateX(-140%); }
     100% { transform: translateX(260%); }
@@ -100,14 +140,19 @@ h1 {
     pointer-events: none;
 }
 
-/* TABLA PREMIUM */
+/* =========================
+   TABLA DESKTOP
+========================= */
+.desktop-table-wrap {
+    display: block;
+}
+
 .table-shell {
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
     overflow: hidden;
     background: rgba(255,255,255,0.015);
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-    width: 100%;
 }
 
 .table-scroll {
@@ -134,7 +179,6 @@ h1 {
 
 .premium-table {
     width: 100%;
-    min-width: 810px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -155,7 +199,6 @@ h1 {
         rgba(18,21,27,0.98) 100%
     );
     border-bottom: 1px solid rgba(255,255,255,0.08);
-    white-space: nowrap;
 }
 
 .premium-table tbody td {
@@ -172,30 +215,90 @@ h1 {
 }
 
 .premium-table th:nth-child(1),
-.premium-table td:nth-child(1) {
-    width: 90px;
-}
+.premium-table td:nth-child(1) { width: 90px; }
 
 .premium-table th:nth-child(2),
-.premium-table td:nth-child(2) {
-    width: 90px;
-}
+.premium-table td:nth-child(2) { width: 90px; }
 
 .premium-table th:nth-child(3),
-.premium-table td:nth-child(3) {
-    width: 260px;
-}
+.premium-table td:nth-child(3) { width: 260px; }
 
 .premium-table th:nth-child(4),
-.premium-table td:nth-child(4) {
-    width: 150px;
-}
+.premium-table td:nth-child(4) { width: 150px; }
 
 .premium-table th:nth-child(5),
-.premium-table td:nth-child(5) {
-    width: 220px;
+.premium-table td:nth-child(5) { width: 220px; }
+
+/* =========================
+   MOBILE LIST
+========================= */
+.mobile-cards-wrap {
+    display: none;
+    margin-top: 8px;
 }
 
+.mobile-case-card {
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.015);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+}
+
+.mobile-case-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.mobile-os {
+    font-size: 19px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.96);
+}
+
+.mobile-state {
+    font-size: 13px;
+    font-weight: 800;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+}
+
+.mobile-meta-row {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.mobile-meta-label {
+    display: block;
+    opacity: 0.72;
+    margin-bottom: 2px;
+    font-size: 12px;
+}
+
+.mobile-meta-value {
+    color: rgba(255,255,255,0.94);
+    font-weight: 600;
+}
+
+.mobile-empty {
+    text-align: center;
+    color: rgba(255,255,255,0.65);
+    padding: 22px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.015);
+}
+
+/* =========================
+   ESTADOS
+========================= */
 .risk-dot {
     display: inline-block;
     width: 16px;
@@ -236,12 +339,30 @@ h1 {
     font-weight: 800;
 }
 
+.mobile-pill-vencido {
+    color: #ff3b30;
+    background: rgba(255,59,48,0.12);
+}
+
+.mobile-pill-urgente {
+    color: #ffb020;
+    background: rgba(255,159,10,0.14);
+}
+
+.mobile-pill-porvencer {
+    color: #FFF176;
+    background: rgba(255,241,118,0.12);
+}
+
+.mobile-pill-default {
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.06);
+}
+
 /* =========================
-   RESPONSIVE SOLO TELÉFONO
-   NO TOCA PC
+   RESPONSIVE
 ========================= */
 @media (max-width: 768px) {
-
     .block-container {
         padding-top: 0.35rem !important;
         padding-bottom: 0.55rem !important;
@@ -250,130 +371,71 @@ h1 {
     }
 
     h1 {
-        font-size: 1.55rem !important;
-        line-height: 1.15 !important;
-        margin-bottom: 0.35rem !important;
+        font-size: 1.5rem !important;
+        line-height: 1.12 !important;
+        margin-bottom: 0.3rem !important;
     }
 
     h2, h3 {
         line-height: 1.15 !important;
     }
 
-    /* Hace que las columnas se apilen en móvil */
-    div[data-testid="stHorizontalBlock"] {
-        flex-wrap: wrap !important;
-        gap: 0.6rem !important;
+    .top-info-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        margin-bottom: 2px;
     }
 
-    div[data-testid="column"] {
-        min-width: 100% !important;
-        flex: 1 1 100% !important;
+    .top-info-box {
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+        white-space: normal !important;
     }
 
-    /* KPI más compactos en móvil */
+    .top-info-right {
+        text-align: left !important;
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 8px;
+    }
+
     .kpi-card {
-        height: auto !important;
-        min-height: 96px !important;
-        padding: 13px 14px !important;
+        min-height: 94px !important;
+        padding: 12px 12px !important;
         border-radius: 12px !important;
     }
 
     .kpi-title {
-        font-size: 16px !important;
-        line-height: 1.15 !important;
+        font-size: 15px !important;
+        line-height: 1.1 !important;
     }
 
     .kpi-value {
-        font-size: 30px !important;
+        font-size: 24px !important;
         line-height: 1.05 !important;
-        margin-top: 2px !important;
-    }
-
-    .kpi-sub {
-        font-size: 12px !important;
         margin-top: 4px !important;
     }
 
-    /* Texto de hora/ultima actualización */
-    .mobile-stack-info {
-        text-align: left !important;
-        font-size: 13px !important;
-        line-height: 1.35 !important;
-        white-space: normal !important;
-        word-break: break-word !important;
+    .kpi-sub {
+        font-size: 11px !important;
+        margin-top: 5px !important;
+        line-height: 1.2 !important;
     }
 
-    /* Barra efectividad */
-    .mobile-ef-row {
-        font-size: 14px !important;
+    .desktop-table-wrap {
+        display: none !important;
     }
 
-    /* Expander */
+    .mobile-cards-wrap {
+        display: block !important;
+    }
+
     .streamlit-expanderHeader {
         font-size: 14px !important;
-    }
-
-    /* Tabla */
-    .table-shell {
-        border-radius: 12px !important;
-    }
-
-    .table-scroll {
-        max-height: 62vh !important;
-    }
-
-    .premium-table {
-        min-width: 690px !important;
-    }
-
-    .premium-table thead th {
-        font-size: 12px !important;
-        padding: 11px 10px !important;
-    }
-
-    .premium-table tbody td {
-        font-size: 12px !important;
-        padding: 10px 10px !important;
-    }
-
-    .premium-table th:nth-child(1),
-    .premium-table td:nth-child(1) {
-        width: 62px !important;
-    }
-
-    .premium-table th:nth-child(2),
-    .premium-table td:nth-child(2) {
-        width: 80px !important;
-    }
-
-    .premium-table th:nth-child(3),
-    .premium-table td:nth-child(3) {
-        width: 210px !important;
-    }
-
-    .premium-table th:nth-child(4),
-    .premium-table td:nth-child(4) {
-        width: 120px !important;
-    }
-
-    .premium-table th:nth-child(5),
-    .premium-table td:nth-child(5) {
-        width: 190px !important;
-    }
-
-    .risk-dot {
-        width: 13px !important;
-        height: 13px !important;
-    }
-
-    /* Dataframe dentro del expander */
-    div[data-testid="stDataFrame"] {
-        width: 100% !important;
-    }
-
-    /* Botones y controles ocupan mejor ancho en teléfono */
-    button, .stButton > button {
-        width: 100%;
     }
 }
 </style>
@@ -411,30 +473,19 @@ if not df.empty and COL_UPDATED_DB in df.columns:
     if tmp.notna().any():
         last_updated = tmp.max()
 
-c_time1, c_time2 = st.columns([1, 1])
+ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
 
-with c_time1:
-    st.markdown(
-        f"""
-<div class="mobile-stack-info" style="text-align:left;">
-    🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
+st.markdown(
+    f"""
+<div class="top-info-wrap">
+    <div class="top-info-box top-info-left">🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b></div>
+    <div class="top-info-box top-info-right">🗄️ Última actualización: <b>{ultima_txt}</b></div>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
+    unsafe_allow_html=True,
+)
 
-with c_time2:
-    ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
-    st.markdown(
-        f"""
-<div class="mobile-stack-info" style="text-align:right;">
-    🗄️ Última actualización: <b>{ultima_txt}</b>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-
-st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
 # ---------------- VALIDACIONES ----------------
 missing = [c for c in [COL_OS_DB, COL_FECHA_DB] if c not in df.columns]
@@ -559,54 +610,33 @@ vencidos = int(((df["EstadoTiempo"] == "VENCIDO") & sin_transportista).sum())
 urgentes = int(((df["EstadoTiempo"] == "URGENTE") & sin_transportista).sum())
 por_vencer = int(((df["EstadoTiempo"] == "POR VENCER") & sin_transportista).sum())
 
-c1, c2, c3, c4 = st.columns(4)
+st.markdown(
+    f"""
+<div class="kpi-grid">
+    <div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
+        <div class="kpi-title">Vencidos</div>
+        <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
+    </div>
 
-with c1:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{kpi_vencidos_bg}; border-left:8px solid #ff3b30;">
-    <div class="kpi-title">Vencidos</div>
-    <div class="kpi-value" style="color:#ff3b30;">{vencidos}</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
+    <div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
+        <div class="kpi-title">Urgentes (&lt;30m)</div>
+        <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
+    </div>
 
-with c2:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{kpi_urgentes_bg}; border-left:8px solid #ff9f0a;">
-    <div class="kpi-title">Urgentes (&lt;30m)</div>
-    <div class="kpi-value" style="color:#ffb020;">{urgentes}</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
+    <div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
+        <div class="kpi-title">Por vencer</div>
+        <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
+    </div>
 
-with c3:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{kpi_porvencer_bg}; border-left:8px solid #FFF176;">
-    <div class="kpi-title">Por vencer</div>
-    <div class="kpi-value" style="color:#FFF176;">{por_vencer}</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-
-with c4:
-    st.markdown(
-        f"""
-<div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
-    <div class="kpi-title">Efectividad</div>
-    <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
-    <div class="kpi-sub">
-        Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b>
+    <div class="kpi-card" style="background:{ef['bg']}; border-left:8px solid {ef['border']};">
+        <div class="kpi-title">Efectividad</div>
+        <div class="kpi-value" style="color:{ef['text']};">{efectividad:.1f}%</div>
+        <div class="kpi-sub">Efectivos: <b>{casos_efectivos}</b> / Total: <b>{total_casos}</b></div>
     </div>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
+    unsafe_allow_html=True,
+)
 
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
@@ -614,7 +644,7 @@ st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 st.markdown(f"""
 <div style="margin-top:10px; margin-bottom:18px;">
 
-<div class="mobile-ef-row" style="
+<div style="
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -635,21 +665,18 @@ overflow:hidden;
 box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
 border:1px solid rgba(255,255,255,0.06);
 ">
-
-<div style="
-width:{ef_pct}%;
-height:100%;
-background:{ef['bar']};
-border-radius:999px;
-transition:width 0.9s ease-in-out;
-box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
-position:relative;
-overflow:hidden;
-">
-
-<div class="progress-shine"></div>
-
-</div>
+    <div style="
+    width:{ef_pct}%;
+    height:100%;
+    background:{ef['bar']};
+    border-radius:999px;
+    transition:width 0.9s ease-in-out;
+    box-shadow: 0 0 10px rgba(255,255,255,0.10), 0 0 12px rgba(0,0,0,0.15);
+    position:relative;
+    overflow:hidden;
+    ">
+        <div class="progress-shine"></div>
+    </div>
 </div>
 
 </div>
@@ -721,6 +748,15 @@ def get_risk_dot_and_classes(estado: str):
         return "#FFF176", "state-porvencer", ""
     return "rgba(255,255,255,0.35)", "", ""
 
+def get_mobile_pill_class(estado: str):
+    if estado == "VENCIDO":
+        return "mobile-pill-vencido"
+    if estado == "URGENTE":
+        return "mobile-pill-urgente"
+    if estado == "POR VENCER":
+        return "mobile-pill-porvencer"
+    return "mobile-pill-default"
+
 def render_premium_table(df_table: pd.DataFrame, height_px: int = 720) -> str:
     headers = [
         "Riesgo",
@@ -775,15 +811,55 @@ def render_premium_table(df_table: pd.DataFrame, height_px: int = 720) -> str:
     body_html = "".join(rows)
 
     return (
-        f'<div class="table-shell">'
-        f'  <div class="table-scroll" style="max-height:{height_px}px;">'
-        f'    <table class="premium-table">'
-        f'      <thead><tr>{header_html}</tr></thead>'
-        f'      <tbody>{body_html}</tbody>'
-        f'    </table>'
+        f'<div class="desktop-table-wrap">'
+        f'  <div class="table-shell">'
+        f'    <div class="table-scroll" style="max-height:{height_px}px;">'
+        f'      <table class="premium-table">'
+        f'        <thead><tr>{header_html}</tr></thead>'
+        f'        <tbody>{body_html}</tbody>'
+        f'      </table>'
+        f'    </div>'
         f'  </div>'
         f'</div>'
     )
 
+def render_mobile_cards(df_table: pd.DataFrame) -> str:
+    if df_table.empty:
+        return '<div class="mobile-cards-wrap"><div class="mobile-empty">No hay registros para mostrar.</div></div>'
+
+    cards = []
+
+    for _, row in df_table.iterrows():
+        estado = str(row["EstadoTiempo"])
+        pill_class = get_mobile_pill_class(estado)
+
+        os_html = escape(str(row["O/S"]))
+        fecha_html = escape(str(row["Fecha Programación de servicio"]))
+        detalle_html = escape(str(row["DetalleTiempo"]))
+
+        card = f"""
+<div class="mobile-case-card">
+    <div class="mobile-case-top">
+        <div class="mobile-os">O/S {os_html}</div>
+        <div class="mobile-state {pill_class}">{escape(estado)}</div>
+    </div>
+
+    <div class="mobile-meta-row">
+        <span class="mobile-meta-label">Fecha Programación de servicio</span>
+        <span class="mobile-meta-value">{fecha_html}</span>
+    </div>
+
+    <div class="mobile-meta-row">
+        <span class="mobile-meta-label">Detalle</span>
+        <span class="mobile-meta-value">{detalle_html}</span>
+    </div>
+</div>
+"""
+        cards.append(card)
+
+    return f'<div class="mobile-cards-wrap">{"".join(cards)}</div>'
+
 tabla_html = render_premium_table(tabla, height_px=720)
-st.markdown(tabla_html, unsafe_allow_html=True)
+mobile_html = render_mobile_cards(tabla)
+
+st.markdown(tabla_html + mobile_html, unsafe_allow_html=True)
