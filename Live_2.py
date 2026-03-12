@@ -22,16 +22,28 @@ COL_TRANSP_DB = "transportista"
 TZ = ZoneInfo("America/Santiago")
 
 # ---------------- STREAMLIT ----------------
-st.set_page_config(page_title="Vencimientos de Casos", page_icon="favicon.png", layout="wide")
+st.set_page_config(
+    page_title="Vencimientos de Casos",
+    page_icon="favicon.png",
+    layout="wide"
+)
 
 st.markdown(
     """
 <style>
-/* CONTENEDOR */
-.block-container { padding-top: 0.6rem !important; padding-bottom: 0.8rem !important; }
+/* =========================
+   CONTENEDOR
+========================= */
+.block-container {
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.8rem !important;
+}
 
 /* TITULOS */
-h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
+h1 {
+    margin-bottom: 0.2rem !important;
+    font-weight: 800 !important;
+}
 
 /* TARJETAS KPI */
 .kpi-card {
@@ -66,12 +78,8 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 /* BRILLO ANIMADO BARRA EFECTIVIDAD */
 @keyframes shine {
-    0% {
-        transform: translateX(-140%);
-    }
-    100% {
-        transform: translateX(260%);
-    }
+    0% { transform: translateX(-140%); }
+    100% { transform: translateX(260%); }
 }
 
 .progress-shine {
@@ -99,12 +107,14 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     overflow: hidden;
     background: rgba(255,255,255,0.015);
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    width: 100%;
 }
 
 .table-scroll {
     max-height: 720px;
     overflow-y: auto;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .table-scroll::-webkit-scrollbar {
@@ -124,6 +134,7 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
 
 .premium-table {
     width: 100%;
+    min-width: 810px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -138,14 +149,13 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     font-size: 14px;
     font-weight: 700;
     color: rgba(255,255,255,0.90);
-
     background: linear-gradient(
         180deg,
         rgba(28,32,40,0.98) 0%,
         rgba(18,21,27,0.98) 100%
     );
-
     border-bottom: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
 }
 
 .premium-table tbody td {
@@ -225,6 +235,147 @@ h1 { margin-bottom: 0.2rem !important; font-weight: 800 !important; }
     color: rgba(255,165,0,0.28);
     font-weight: 800;
 }
+
+/* =========================
+   RESPONSIVE SOLO TELÉFONO
+   NO TOCA PC
+========================= */
+@media (max-width: 768px) {
+
+    .block-container {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.55rem !important;
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
+    }
+
+    h1 {
+        font-size: 1.55rem !important;
+        line-height: 1.15 !important;
+        margin-bottom: 0.35rem !important;
+    }
+
+    h2, h3 {
+        line-height: 1.15 !important;
+    }
+
+    /* Hace que las columnas se apilen en móvil */
+    div[data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 0.6rem !important;
+    }
+
+    div[data-testid="column"] {
+        min-width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    /* KPI más compactos en móvil */
+    .kpi-card {
+        height: auto !important;
+        min-height: 96px !important;
+        padding: 13px 14px !important;
+        border-radius: 12px !important;
+    }
+
+    .kpi-title {
+        font-size: 16px !important;
+        line-height: 1.15 !important;
+    }
+
+    .kpi-value {
+        font-size: 30px !important;
+        line-height: 1.05 !important;
+        margin-top: 2px !important;
+    }
+
+    .kpi-sub {
+        font-size: 12px !important;
+        margin-top: 4px !important;
+    }
+
+    /* Texto de hora/ultima actualización */
+    .mobile-stack-info {
+        text-align: left !important;
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+    /* Barra efectividad */
+    .mobile-ef-row {
+        font-size: 14px !important;
+    }
+
+    /* Expander */
+    .streamlit-expanderHeader {
+        font-size: 14px !important;
+    }
+
+    /* Tabla */
+    .table-shell {
+        border-radius: 12px !important;
+    }
+
+    .table-scroll {
+        max-height: 62vh !important;
+    }
+
+    .premium-table {
+        min-width: 690px !important;
+    }
+
+    .premium-table thead th {
+        font-size: 12px !important;
+        padding: 11px 10px !important;
+    }
+
+    .premium-table tbody td {
+        font-size: 12px !important;
+        padding: 10px 10px !important;
+    }
+
+    .premium-table th:nth-child(1),
+    .premium-table td:nth-child(1) {
+        width: 62px !important;
+    }
+
+    .premium-table th:nth-child(2),
+    .premium-table td:nth-child(2) {
+        width: 80px !important;
+    }
+
+    .premium-table th:nth-child(3),
+    .premium-table td:nth-child(3) {
+        width: 210px !important;
+    }
+
+    .premium-table th:nth-child(4),
+    .premium-table td:nth-child(4) {
+        width: 120px !important;
+    }
+
+    .premium-table th:nth-child(5),
+    .premium-table td:nth-child(5) {
+        width: 190px !important;
+    }
+
+    .risk-dot {
+        width: 13px !important;
+        height: 13px !important;
+    }
+
+    /* Dataframe dentro del expander */
+    div[data-testid="stDataFrame"] {
+        width: 100% !important;
+    }
+
+    /* Botones y controles ocupan mejor ancho en teléfono */
+    button, .stButton > button {
+        width: 100%;
+    }
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -265,7 +416,7 @@ c_time1, c_time2 = st.columns([1, 1])
 with c_time1:
     st.markdown(
         f"""
-<div style="text-align:left;">
+<div class="mobile-stack-info" style="text-align:left;">
     🕒 Hora actual: <b>{now_ui.strftime('%Y-%m-%d %H:%M:%S')}</b>
 </div>
 """,
@@ -276,7 +427,7 @@ with c_time2:
     ultima_txt = last_updated.strftime("%Y-%m-%d %H:%M:%S") if last_updated else "—"
     st.markdown(
         f"""
-<div style="text-align:right;">
+<div class="mobile-stack-info" style="text-align:right;">
     🗄️ Última actualización: <b>{ultima_txt}</b>
 </div>
 """,
@@ -460,9 +611,10 @@ with c4:
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 # ---------------- BARRA GLOBAL EFECTIVIDAD ----------------
-st.markdown(f"""<div style="margin-top:10px; margin-bottom:18px;">
+st.markdown(f"""
+<div style="margin-top:10px; margin-bottom:18px;">
 
-<div style="
+<div class="mobile-ef-row" style="
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -500,7 +652,8 @@ overflow:hidden;
 </div>
 </div>
 
-</div>""", unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------- PRÓXIMO VENCIMIENTO ----------------
 df_valid = df.dropna(subset=[COL_FECHA_DB]).copy()
